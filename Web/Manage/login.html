@@ -61,7 +61,7 @@
                         layer.close(lodingIndex);
                         if (json && json.status == 1) {
                             var key = "UserLoginInfo";
-                            layui.data(key, {});//临时存储
+                            layui.data(key, {});//临时存储信息
                             layui.data(key, { key: json.data["UserGuid"], value: json.data });
                             window.location.href = "index.html";
                         } else {
