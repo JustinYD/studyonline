@@ -1,0 +1,257 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../scripts/layui/css/layui.css" />
+    <style>
+        body {
+            padding: 15px;
+        }
+    </style>
+    <meta charset="utf-8" />
+</head>
+<body>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <button class="layui-btn" type="button" onclick="javascript:window.location.href='practiceexam.html'">
+                <i class="layui-icon">&#xe603;</i>
+            </button>
+        </div>
+    </div>
+    <form class="layui-form" name="examtk">
+        <input type="hidden" id="hdExamGuid" name="ExamGuid" />
+        <input type="hidden" id="hdExamScore" name="ExamScore" />
+        <input type="hidden" id="hdStatus" name="Status" value="0" />
+        <div class="layui-form-item" style="margin-top: 20px;">
+            <label class="layui-form-label">
+                考次名称
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" name="ExamName" id="ExamName" lay-verify="required" placeholder="请输入考次名称" autocomplete="off" class="layui-input" style="width:330px;" />
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                使用试卷
+            </label>
+            <div class="layui-input-inline">
+                <select name="sltPapers" lay-verify="required" id="sltPapers" lay-filter="sltPapers" lay-search></select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                参考人员
+            </label>
+            <div class="layui-input-block" lay-filter="rbtIsAll" >
+                <input type="radio" name="isAll" lay-filter="rbtIsAll" value="1" title="所有用户" checked>
+                <input type="radio" name="isAll" lay-filter="rbtIsAll" value="0" title="部分用户">
+            </div>
+        </div>
+        <div class="layui-form-item" id="userlistselect" style="display:none">
+            <label class="layui-form-label">
+            </label>
+            <div class="layui-input-block" id="userList">
+
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit="" lay-filter="submit">
+                    立即提交
+                </button>
+            </div>
+        </div>
+    </form>
+    <script type="text/javascript" src="../scripts/layui/layui.js"></script>
+    <script>
+        layui.use(["form"], function () {
+            var $ = layui.jquery, form = layui.form;
+            var _param = { CHKUSERGUIDS: "" };
+            var _handlers = {
+                toASCII: function (str) {
+                    if (!str) return "";
+                    var s = "";
+                    s = str.replace(/&/g, "&#38;");
+                    s = s.replace(/</g, "&#60;");
+                    s = s.replace(/>/g, "&#62;");
+                    s = s.replace(/ /g, "&#32;");
+                    s = s.replace(/\'/g, "&#39;");
+                    s = s.replace(/\"/g, "&#34;");
+                    s = s.replace(/\\/g, "&#92;");
+                    s = s.replace(/\:/g, "&#58;");
+                    s = s.replace(/\n/g, "/r/n");
+                    s = s.replace(/{/g, "&#123;");
+                    s = s.replace(/}/g, "&#125;");
+                    s = s.replace(/\^/g, "&#94;");
+                    s = s.replace(/`/g, "&#60;");
+                    return s;
+                },
+                _GETPAPERLIST: function (selectVal) {
+                    $.ajax({
+                        url: "../tools/PracticePaperHandler.ashx",
+                        data: { action: "getlist", page: 1, limit: 99999 },
+                        dataType: "json",
+                        type: "post",
+                        success: function (json) {
+                            if (json && json.code == 0) {
+                                var html = "<option value='' _s='0'>请选择试卷</option>";
+                                for (var i = 0; i < json.data.length; i++) {
+                                    var obj = json.data[i];
+                                    var isSelected = selectVal == obj["PaperGuid"] ? "selected" : "";
+                                    if (isSelected) {
+                                        $("#hdExamScore").val(obj["Score"]);
+                                    }
+                                    html += "<option value='" + obj["PaperGuid"] + "'  _s=\"" + obj["Score"] + "\" " + isSelected + ">" + _handlers.toASCII(obj["PaperName"]) + "</option>";
+                                }
+                                $("#sltPapers").html(html);
+                                form.render('select');
+                                _handlers._GETUSERLIST();
+                            }
+                        }, error: function () { }
+                    });
+                },
+                _GETUSERLIST: function () {
+                    $.ajax({
+                        url: "../tools/UserHandler.ashx",
+                        data: { action: "getlist", page: 1, limit: 99999 },
+                        dataType: "json",
+                        type: "post",
+                        success: function (json) {
+                            if (json && json.code == 0) {
+                                var html = "";
+                                for (var i = 0; i < json.data.length; i++) {
+                                    var obj = json.data[i];
+                                    var userGuid = ";"+obj["UserGuid"];
+                                    var isChecked = _param.CHKUSERGUIDS.indexOf(userGuid) > -1 ? " checked" : "";
+                                    html += "<input type=\"checkbox\" lay-filter=\"chkUser\" value=\"" + obj["UserGuid"] + "\" " + isChecked + " name=\"chkUser\" lay-skin=\"primary\" title=\"" + _handlers.toASCII(obj["UserName"]) + "\" />";
+                                }
+                                $("#userList").html(html);
+                                if (_param.CHKUSERGUIDS) {
+                                    var len = $("#userList input[type='checkbox']").size();
+                                    var checkedLen = $("#userList input[type='checkbox']:checked").size();
+                                    if (len> checkedLen) {
+                                        $("div[lay-filter='rbtIsAll'] div.layui-form-radio")[1].click();
+                                    }
+                                }
+                                
+                                form.render('checkbox');
+                            }
+                        }, error: function () { }
+                    })
+                },
+                _GUID: function () {
+                    var guid = "";
+                    for (var i = 1; i <= 32; i++) {
+                        var n = Math.floor(Math.random() * 16.0).toString(16);
+                        guid += n;
+                        if ((i == 8) || (i == 12) || (i == 16) || (i == 20))
+                            guid += "-";
+                    }
+                    return guid;
+                },
+                getQueryString: function (name) {
+                    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+                    var r = window.location.search.substr(1).match(reg);
+                    if (r != null) return unescape(r[2]); return null;
+                },
+                _GETDETAIL: function () {
+                    $("#hdExamGuid").val(_handlers.getQueryString("id") || "00000000-0000-0000-0000-000000000000");
+                    var examGuid = $("#hdExamGuid").val();
+                    if (examGuid == "00000000-0000-0000-0000-000000000000") {
+                        _handlers._GETPAPERLIST("");
+                    } else {
+                        //加载详细信息 success 里面 _handlers._GETPAPERLIST(paperGuid);
+                        //循环用户guid 到  _param.CHKUSERGUIDS ;
+                        $.ajax({
+                            url: "../tools/PracticeExamHandler.ashx",
+                            data: { action: "kcdetail", id: examGuid },
+                            dataType: "json",
+                            type: "post",
+                            success: function (json) {
+                                if (json && json.status && json.data) {
+                                    var obj = json.data;
+                                    $("#ExamName").val(obj["ExamName"]);
+                                    $("#hdStatus").val(obj["Status"]);
+                                    for (var i = 0; i < obj["UserList"].length; i++) {
+                                        var userGuid = obj["UserList"][i]["UserGuid"];
+                                        _param.CHKUSERGUIDS += ";" + userGuid;
+                                    }
+                                    _handlers._GETPAPERLIST(obj["PaperGuid"]);
+                                }
+                            }, error: function () { }
+                        })
+                    }
+                }
+            };
+
+            _handlers._GETDETAIL();
+
+            form.on('radio(rbtIsAll)', function (data) {
+                var val = data.value;
+                if (val == "0") {
+                    $("#userlistselect").show()
+                } else {
+                    $("#userlistselect").hide()
+                }
+            });
+
+            form.on('select(sltPapers)', function (data) {
+                $("#hdExamScore").val(parseFloat($(data.elem).find(":selected").attr("_s")));
+            });
+
+
+            form.on('radio(rbtIsAll)', function (data) {
+                var val = data.value;
+                if (val == "0") {
+                    $("#userlistselect").show()
+                } else {
+                    $("#userlistselect").hide()
+                }
+            });
+
+            form.on('checkbox(chkUser)', function (data) {
+                if (data.elem.checked) {
+                    _param.CHKUSERGUIDS += ";" + data.value;
+                } else {
+                    _param.CHKUSERGUIDS = _param.CHKUSERGUIDS.replace(";" + data.value, "");
+                }
+            });
+
+
+            form.on('submit(submit)', function (data) {
+                var obj = data.field;
+                var isAll = obj["isAll"];
+                var userGuids = "";
+                if (isAll == "0") {
+                    userGuids = _param.CHKUSERGUIDS;
+                    if (!userGuids) {
+                        layer.msg('请选择参考人员。');
+                        return false;
+                    }
+                }
+                var examScore = _param.PAPERSCORE;
+                var paperGuid = obj["sltPapers"];
+                var i = layer.load(0, { shade: [0.5, '#fff'] });
+                $.ajax({
+                    url: "../tools/PracticeExamHandler.ashx",
+                    data: { action: "kcop", json: JSON.stringify(obj), paperGuid: paperGuid, isAll: isAll, userGuids: userGuids, examScore: examScore },
+                    dataType: "json",
+                    type: "post",
+                    success: function (json) {
+                        layer.close(i);
+                        var ii = layer.alert(json.msg, function (index) {
+                            layer.close(ii);
+                            if (json.status == 1) {
+                                layui.data('selectedQuestions', null);
+                                window.location.reload();
+                            }
+                        });
+                    }, error: function () { }
+                })
+                return false;
+            });
+        })
+    </script>
+</body>
+</html>

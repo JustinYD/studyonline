@@ -1,0 +1,27 @@
+﻿body {padding:0px;margin:0px;font-family:微软雅黑}
+div.main {
+    text-align:center;
+    margin-top:10%
+}
+    div.main img {
+    max-width:100%;
+    }
+
+input.txt {
+border:1px solid gray;
+padding:0px;margin:0px;height:35px;line-height:35px;
+padding:5px;
+font-size:18px;
+width:80%;
+}
+button.submit{
+   padding:0px;width:82%!important;
+   height:45px;
+   border-radius:5px;
+   border:0px;
+   background:#FF5722;
+   margin:0 auto;
+   padding:10px!important;
+   font-size:18px;
+   color:#fff;
+}

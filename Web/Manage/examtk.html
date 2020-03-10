@@ -1,0 +1,146 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <meta name="renderer" content="webkit" />
+    <link rel="stylesheet" type="text/css" href="../Scripts/layui/css/layui.css" media="all" />
+    <style>
+        body {
+            padding: 15px;
+             overflow-y: scroll;
+        }
+    </style>
+</head>
+<body>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <button class="layui-btn" id="btnAdd">增加</button>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">
+                题库名称
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="txtKw" lay-verify="required" autocomplete="off" class="layui-input" />
+            </div>
+            <button id="btnSearch" class="layui-btn layui-btn-normal layui-bg-green"><i class="layui-icon">&#xe615;</i></button>
+            <button id="btnReset" class="layui-btn layui-btn-normal layui-bg-green"><i class="layui-icon">&#x1002;</i></button>
+        </div>
+    </div>
+
+    <table class="layui-hide" id="stklist" lay-filter="test"></table>
+    <script type="=text/html" id="stkNameTPL">
+                        {{=d.STKName }}
+    </script>
+    <script type="=text/html" id="questionTPL">
+        <a href="questions.html?id={{d.STKGuid}}">试题列表</a>
+    </script>
+    <script type="text/html" id="actionTpl">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    </script>
+
+    <script type="text/javascript" src="../Scripts/layui/layui.js"></script>
+    <script>
+
+        layui.use('table', function () {
+            var table = layui.table;
+            var $ = layui.jquery;
+
+            var _handlers = {
+                _show: function (stkGuid, stkName) {
+                    var title = stkGuid ? "编辑" : "新增";
+                    var content = "examtkop.html" + (stkGuid ? "?name=" + stkName : "");
+                    layer.closeAll();
+                    layer.open({
+                        type: 2,
+                        title: title,
+                        shade: false,
+                        area: ['500px', '240px'],
+                        maxmin: true,
+                        content: content,
+                        shade: [0.8, '#393D49'],
+                        success: function (index, layero) {
+                           
+                        },
+                        btn: ['保存', '关闭'],
+                        yes: function (index, layero) {
+                            var res = window["layui-layer-iframe" + index].callback();
+                            if (res) {
+                                var i = layer.load(0, { shade: [0.5, '#fff'] });
+                                $.ajax({
+                                    url: "../tools/ExamHandler.ashx",
+                                    data: { action: "stk", id: stkGuid, stkName: escape(res) },
+                                    dataType: "json",
+                                    type: "post",
+                                    success: function (json) {
+                                        layer.close(i);
+                                        layer.alert(json.msg, function () {
+                                            layer.closeAll();
+                                            $("#btnSearch").click();
+                                        });
+                                    }, error: function () { }
+                                })
+                            }
+                        }
+                    });
+                },
+                _getlist: function () {
+                    table.render({
+                        id: "stklist",
+                        elem: "#stklist",
+                        page: true, limit: 10,
+                        cellMinWidth: 100,
+                        url: "../tools/ExamHandler.ashx?action=stklist",
+                        cols: [[{ field: "STKID", title: "编号", width: 60 }, { field: "STKName", title: "试题库名称", templet: "#stkNameTPL" }, { field: "CreateTime", title: "入库时间", width: 180 }, { field: "STKGuid1", title: "试题", templet: "#questionTPL", width: 100 }, { field: "STKGuid", title: "操作", templet: "#actionTpl", width: 160 }]]
+                    })
+                }
+            };
+            _handlers._getlist();
+
+            $("#btnAdd").click(function () {
+                _handlers._show("", "");
+            })
+
+            $("#btnSearch").click(function () {
+                var kw = $.trim($("#txtKw").val());
+                table.reload("stklist", { where: { kw: kw } });
+            });
+            $("#btnReset").click(function () {
+                $("#txtKw").val("");
+                table.reload("stklist", { where: { kw: "" } });
+            });
+
+            table.on('tool(test)', function (obj) {
+                var data = obj.data;
+                if (obj.event === 'del') {
+                    layer.confirm('确定要删除该题库?', function (index) {
+                        $.ajax({
+                            url: "../tools/ExamHandler.ashx",
+                            data: { action: "delete", id: data.STKGuid },
+                            dataType: "json",
+                            type: "post",
+                            success: function (json) {
+                                layer.close(index);
+                                var ii = layer.alert(json.msg, function (index) {
+                                    layer.close(ii);
+                                    if (json.status == 1) {
+                                        $("#btnReset").click();
+                                    }
+                                });
+                            }, error: function () { }
+                        })
+                    });
+                } else if (obj.event === "edit") {
+                    var guid = data.STKGuid;
+                    var name = data.STKName
+                    _handlers._show(guid, escape(name));
+                }
+            });
+
+        });
+    </script>
+
+</body>
+</html>

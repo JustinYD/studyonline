@@ -1,0 +1,186 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <link rel="stylesheet" type="text/css" href="../Scripts/layui/css/layui.css" media="all" />
+    <style>
+        div.paperName {
+            margin-top: 50px;
+            width: 100%;
+            text-align: center;
+            min-height: 35px;
+            line-height: 35px;
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        div.paperRemark {
+            display: block;
+            padding: 20px;
+        }
+
+        div.paperContent {
+            padding: 20px;
+        }
+
+        div.img {
+            max-width: 80%;
+        }
+
+            div.img img {
+                max-width: 80%;
+            }
+
+        div.layui-colla-item h2.layui-colla-title {
+            height: auto;
+            min-height: 20px;
+            ;
+            line-height: 25px;
+            padding-top: 7px;
+            padding-bottom: 5px;
+        }
+
+            div.layui-colla-item h2.layui-colla-title i {
+                line-height: 42px;
+            }
+
+        div.layui-input-block {
+            margin-left: 0px;
+        }
+
+            div.layui-input-block {
+                font-size: 18px;
+            }
+    </style>
+    <meta charset="utf-8" />
+</head>
+<body>
+    <script id="paper" type="text/html">
+        <div class="paperName">{{d.PaperName}}（得分：{{d.UserScore}}  / 总分：{{d.ExamScore}}）</div>
+        {{# if(d.Remark){ }}
+        <div class="paperRemark"> {{d.Remark }}</div>
+        {{# } }}
+        <div class="paperRemark">
+            图标实例：
+            <div class="layui-input-block">
+                <i class="layui-icon " style="color:#009688">&#xe618;</i>选择正确
+            </div>
+            <div class="layui-input-block">
+                <i class="layui-icon " style="color:#009688">&#xe616;</i>正确答案
+            </div>
+            <div class="layui-input-block">
+                <i class="layui-icon " style="color:#FF5722">&#xe616;</i> 你的选项
+            </div>
+        </div>
+        <div class="paperContent">
+            <div class="layui-collapse">
+                {{#  layui.each(d.QuestionList, function(index, item){ }}
+                <div class="layui-colla-item">
+                    <h2 class="layui-colla-title" style="padding-left:10px;">
+                        {{# if(item.IsRight==1){ }}
+                        <i class="layui-icon " style="color:#009688;font-weight:bold">&#xe605;</i>
+                        {{# }else{ }}
+                        <i class="layui-icon " style="color:#ff0000;font-weight:bold">&#x1006;</i>
+                        {{# } }}
+                        <b>{{index+1 }}.</b>
+                        {{item.QuestionName}}
+                        {{# if(item.QuestionType==1){ }}
+                        （单选）
+                        {{# }else{ }}
+                        （多选）
+                        {{# } }}
+                        {{item.QuestionScore}}分
+                    </h2>
+                    <div class="layui-colla-content layui-show layui-form" lay-filter="answers">
+                        {{# if(item.QuestionImg) { }}
+                        <div class="img">
+                            <img src="{{item.QuestionImg}}" />
+                        </div>
+                        {{# } }}
+                        <div class="layui-form-item">
+                            <p style="margin-top:20px;display:block;">选项：<p>
+                                {{# layui.each(item.AnswerItem,function(ii,answerItem){ }}
+                                <div class="layui-input-block">
+                                    {{# if(answerItem.IsRightAnswer==1&& item.SelectAnswerGuid.getIndex(answerItem.AnswerGuid)>-1){ }}
+                                    <i class="layui-icon " style="color:#009688">&#xe618;</i><!-- 回答正确 -->
+                                    {{# }else if(answerItem.IsRightAnswer==1&& item.SelectAnswerGuid.getIndex(answerItem.AnswerGuid)==-1){ }}
+                                    <i class="layui-icon " style="color:#009688">&#xe616;</i><!-- 正确答案 -->
+                                    {{# }else if(answerItem.IsRightAnswer==0&& item.SelectAnswerGuid.getIndex(answerItem.AnswerGuid)>-1){  }}
+                                    <i class="layui-icon " style="color:#FF5722">&#xe616;</i><!-- 你的选项 -->
+                                    {{# }else{  }}
+                                    <i class="layui-icon " style="color:#2F4056">&#xe626;</i><!-- 其他选项 -->
+                                    {{# } }}
+                                    {{answerItem.AnswerName}}
+                                </div>
+                                {{# }) }}
+                        </div>
+                    </div>
+                </div>
+                {{# }) }}
+            </div>
+        </div>
+    </script>
+    <div id="view"></div>
+    <script type="text/javascript" src="../Scripts/layui/layui.js"></script>
+    <script>
+        layui.use(["form", "element", "laytpl"], function () {
+            var $ = layui.jquery, form = layui.form, laytpl = layui.laytpl;
+            var _param = { _ANSWER: {} };
+            var _handler = {
+                getQueryString: function (name) {
+                    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+                    var r = window.location.search.substr(1).match(reg);
+                    if (r != null) return unescape(r[2]); return null;
+                },
+                _GETPAPER: function () {
+                    var i = layer.load(0, { shade: [0.5, '#fff'] });
+                    var id = _handler.getQueryString("id");
+                    var uid = _handler.getQueryString("uid");
+                    $.ajax({
+                        url: "../tools/UserPaperHandler.ashx",
+                        data: { action: "getpaper", id: id, uid: uid },
+                        dataType: "json",
+                        type: "post",
+                        success: function (json) {
+                            layer.close(i);
+                            if (json && json.code == 0) {
+                                var s = _handler.getQueryString("s");
+                                var userScore = _handler.getQueryString("ds");
+                                var data = json.data;
+                                data["ExamScore"] = s;
+                                data["UserScore"] = userScore;
+                                data["AnswerWords"] = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+
+                                var getTpl = paper.innerHTML, view = document.getElementById('view');
+                                laytpl(getTpl).render(data, function (html) {
+                                    view.innerHTML = html;
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+            _handler._GETPAPER();
+        });
+
+        Array.prototype.getIndex = function (item) {
+            if (!item || !this.length) return -1;
+            var i = 0,
+                        len = this.length;
+            for (; i < len; i++) {
+                if (this[i] === item) return i;
+            }
+            return -1;
+        };
+
+        Array.prototype.del = function (n) {
+            if (n < 0) return this;
+            return this.slice(0, n).concat(this.slice(n + 1, this.length));
+        };
+
+    </script>
+</body>
+</html>

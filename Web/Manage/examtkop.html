@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../scripts/layui/css/layui.css" />
+    <style>
+        body {
+        padding:15px;
+        }
+    </style>
+	<meta charset="utf-8" />
+</head>
+<body>
+    <form class="layui-form" name="examtk">
+        <div class="layui-form-item" style="margin-top: 20px;">
+            <label class="layui-form-label">
+                试题库名称
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" name="STKName"  id="STKName" lay-verify="required" placeholder="请输入试题库名称" autocomplete="off" class="layui-input" style="width:330px;" />
+            </div>
+        </div>
+    </form>
+    <script src="../Scripts/jquery-3.2.1.js"></script>
+    <script src="../Scripts/jquery.common.js"></script>
+    <script>
+        $(function () {
+            var name = unescape(jQuery.getQueryString("name") || "");
+            $("#STKName").val(name);
+        })
+        var callback = function () {
+            var stkName = $.trim($("#STKName").val());
+            if (stkName) return stkName;
+        }
+
+       
+
+       
+    </script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>发布学习</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <link rel="stylesheet" type="text/css" href="../Scripts/layui/css/layui.css" media="all" />
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="../Scripts/jquery-3.2.1.js"></script>
+    <style>
+        body {
+            padding: 15px;
+            overflow-y: scroll;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="studylist">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <el-button round @click="add" type="primary">增加</el-button>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">
+                    学习标题
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" v-model="keywords" lay-verify="required" autocomplete="off" class="layui-input" />
+                </div>
+                <el-button circle  type="primary"><i class="el-icon-search"></i></el-button>
+            </div>
+        </div>
+        <div>
+            <el-table :data=searchtitle(keywords)
+                      border
+                      v-loading="loading"
+                      element-loading-text="加载数据ing"
+                      element-loading-spinner="el-icon-loading"
+                      element-loading-background="rgba(0, 0, 0, 0.8)"
+                      height="400"
+                      style="width: 100%">
+                <el-table-column prop="title"
+                                 label="标题"
+                                 width="380">
+                </el-table-column>
+                <el-table-column prop="content"
+                                 label="内容"
+                                 width="590">
+                </el-table-column>
+                <el-table-column prop="time"
+                                 label="时间"
+                                 width="220">
+                </el-table-column>
+                <el-table-column fixed="right"
+                                 label="操作"
+                                 width="100">
+                    <template slot-scope="scope">
+                        <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>
+                        <el-button type="text" size="small">编辑</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <el-dialog title="添加课程" :visible.sync="dialogFormVisible">
+                <el-divider><i class="el-icon-mobile-phone"></i>  输入课程标题</el-divider>
+                <el-input type="text" v-model="title" autocomplete="off"></el-input>
+                <el-divider><i class="el-icon-mobile-phone"></i>  提交资源</el-divider>
+                <input class="el-input" type="file" @change="getFile($event)"  autocomplete="off">
+                <el-divider></el-divider>
+                <el-button type="primary" @click="submitForm($event)">提交</el-button>
+                <el-button @click="reset">重置</el-button>
+            </el-dialog>
+        </div>
+    </div>
+<script>
+    var studylist = new Vue({
+        el:"#studylist",
+        data: {
+            loading: false,
+            dialogFormVisible: false,
+            title: '',
+            content: '',
+            file:'',
+            keywords:'',
+            tableData: [{
+                title: "第一章",
+                content: "好几个激活工具.pdf",
+                time:''
+            },
+            {
+                title: "第二章",
+                content: "好几个激活工具.pdf",
+                time:''
+                }],
+            form: [{
+                title: '',
+                content: '',
+                time:''
+            }]
+        },
+        methods: {
+            add() {
+                this.dialogFormVisible=true
+            },
+            getFile(event) {
+                this.content = event.target.files[0];
+            },
+            submitForm(event) {
+                //if (this.title == '' && this.content == '') {
+                if (this.title == '') {
+                    this.$notify.error({
+                        title: '错误',
+                        message: '请填写标题和内容！'
+                    });
+                } else {
+                    var myDate = new Date()
+                    var t = myDate.toLocaleDateString();
+                    var t1 = myDate.toLocaleTimeString();
+                    event.preventDefault();
+                    let formData = new FormData();
+                    formData.append('content',this.content);
+                    formData.append('title',this.title);
+                    formData.append('time',t + t1);
+                    formData.append('action','getstudylist');
+                    this.form[0].title = this.title
+                    this.form[0].content = this.content
+                    this.form[0].time = t + t1
+                    this.tableData.push({ title: this.title, content: this.content.name, time: t + t1 })
+                    let config = {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }
+                    $.ajax({
+                        url: "../tools/StudyHandler.ashx",
+                        data: { action: "getstudylist", title: this.title, time: t + t1, content: this.content },
+                        //data: formData,
+                        dataType: "json",
+                        type: "post",
+                        contentType:false,
+                        processData:false,
+                        success: function (json) {
+                            console.log(json)
+                        }
+                    });
+
+
+
+                }
+            },
+            searchtitle(keywords) {
+                return this.tableData.filter(item => {
+                    if(item.title.includes(keywords)){
+                        return item;
+                    }
+                })
+            },
+            upload() {
+                console.log(this.title,this.content)
+            },
+            reset() {
+                this.title = this.content=""
+            },
+            search() {
+                console.log("search")
+            },
+            handleClick(row) {
+                this.form = row
+                console.log(this.form)
+            }
+        }
+        
+    })
+</script>
+</body>
+</html>

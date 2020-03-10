@@ -1,0 +1,143 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../scripts/layui/css/layui.css" />
+    <style>
+        body {
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+    <form class="layui-form" name="paper">
+        <script type="text/html" id="show">
+
+            <div class="layui-form-item" style="margin-top: 20px;">
+                <label class="layui-form-label">
+                    试卷名称
+                </label>
+                <div class="layui-input-inline">
+                    <div class="layui-form-mid layui-word-aux">{{=d.PaperName}}</div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    试卷简介
+                </label>
+                <div class="layui-input-block">
+                    <div class="layui-form-mid layui-word-aux">
+                        {{d.Remark}}
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    试卷总分
+                </label>
+                <div class="layui-input-inline">
+                    <div class="layui-form-mid layui-word-aux">
+                        {{d.Score}}分
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    试题选择
+                </label>
+                <div class="layui-input-block">
+                    <div class="layui-collapse layui-form" id="selectQuestions" lay-filter="selectQuestions">
+
+                    </div>
+                </div>
+            </div>
+        </script>
+        <div id="view">
+        </div>
+    </form>
+    <script type="text/javascript" src="../scripts/layui/layui.js"></script>
+    <script>
+        layui.use(["form", "laytpl", "layer", "element"], function () {
+            var laytpl = layui.laytpl;
+            var layer = layui.layer;
+            var $ = layui.jquery;
+            var element = layui.element;
+            var form = layui.form;
+            var _handlers = {
+                getQueryString: function (name) {
+                    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+                    var r = window.location.search.substr(1).match(reg);
+                    if (r != null) return unescape(r[2]); return null;
+                },
+                toASCII: function (str) {
+                    if (!str) return "";
+                    var s = "";
+                    s = str.replace(/&/g, "&#38;");
+                    s = s.replace(/</g, "&#60;");
+                    s = s.replace(/>/g, "&#62;");
+                    s = s.replace(/ /g, "&#32;");
+                    s = s.replace(/\'/g, "&#39;");
+                    s = s.replace(/\"/g, "&#34;");
+                    s = s.replace(/\\/g, "&#92;");
+                    s = s.replace(/\:/g, "&#58;");
+                    s = s.replace(/\n/g, "/r/n");
+                    s = s.replace(/{/g, "&#123;");
+                    s = s.replace(/}/g, "&#125;");
+                    s = s.replace(/\^/g, "&#94;");
+                    s = s.replace(/`/g, "&#60;");
+                    return s;
+                }
+            }
+            var id = _handlers.getQueryString("id");
+            if (id) {
+                var getTpl = show.innerHTML, view = document.getElementById('view');
+                var i = layer.load(0, { shade: [0.5, '#fff'] });
+                $.ajax({
+                    url: "../tools/PaperHandler.ashx",
+                    data: { action: "detail", id: id },
+                    dataType: "json",
+                    type: "post",
+                    success: function (json) {
+                        layer.close(i);
+                        if (json && json.code == 0) {
+                            laytpl(getTpl).render(json.data, function (html) {
+                                view.innerHTML = html;
+                                var qlist = json.data["QuestionList"];
+                                var html = "";
+                                for (var ii = 0; ii < qlist.length; ii++) {
+                                    var obj = qlist[ii];
+                                    var typeName = obj["QuestionType"] == 1 ? "单选" : "多选";
+                                    html += "<div class=\"layui-colla-item\"><h2 class=\"layui-colla-title\">【" + (ii + 1) + "】" + "[" + $.trim(obj["Number"]) + "]" + _handlers.toASCII(obj["QuestionName"]) + "    " + typeName + "（" + obj["QuestionScore"] + " 分）</h2>";
+                                    html += "<div class=\"layui-colla-content  layui-form\" lay-filter=\"answers\">";
+                                    var img = obj["QuestionImg"];
+                                    if (img) {
+                                        html += "<img src=\"" + img + "\" />";
+                                    }
+                                    html += "<div class=\"layui-form-item\" ><p>选项：<p>";
+                                    for (var j = 0; j< obj.AnswerItem.length; j++) {
+                                        var answerObj = obj.AnswerItem[j];
+                                        if (obj["QuestionType"] == 1) { //单选
+                                            html += "<div class=\"layui-input-inline\"><i class=\"layui-icon\" " + (answerObj["IsRightAnswer"] == 1 ? "style=\"color:#5FB878\"" : "") + ">" + (answerObj["IsRightAnswer"] == 1 ? "&#xe643;" : "&#xe63f;") + "</i> " + answerObj["AnswerName"] + "</div>";
+                                        } else {
+                                            html += "<div class=\"layui-input-inline\"><input type=\"checkbox\" disabled=\"\" lay-skin=\"primary\" title=\"" + answerObj["AnswerName"] + "\" " + (answerObj["IsRightAnswer"] == 1 ? "checked" : "") + " /></div>";
+                                        }
+                                    }
+                                    html += "</div>";
+                                    html +="</div>";
+                                    html += "</div>";
+                                }
+                                $("#selectQuestions").html(html);
+                                element.render('collapse', 'selectQuestions');
+                                form.render('radio', 'answers');
+                                form.render('checkbox', 'answers');
+                            });
+                        }
+                    }, error: function () { }
+                })
+            }
+        })
+
+    </script>
+</body>
+</html>

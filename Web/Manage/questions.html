@@ -1,0 +1,117 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+    <meta name="renderer" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <link rel="stylesheet" type="text/css" href="../Scripts/layui/css/layui.css" media="all" />
+	<meta charset="utf-8" />
+   
+
+    <style>
+        body {
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <button class="layui-btn" onclick="javascript: window.location.href = 'examtk.html'">
+                <i class="layui-icon">&#xe603;</i>
+            </button>
+            <button class="layui-btn" type="button" id="btnAdd">
+                <i class="layui-icon">&#xe61f;</i>
+            </button>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">
+                试题名称
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="txtKw" lay-verify="required" autocomplete="off" class="layui-input" />
+            </div>
+            <button id="btnSearch" class="layui-btn layui-btn-normal layui-bg-green"><i class="layui-icon">&#xe615;</i></button>
+            <button id="btnReset" class="layui-btn layui-btn-normal layui-bg-green"><i class="layui-icon">&#x1002;</i></button>
+        </div>
+    </div>
+
+    <table class="layui-table" id="questionlist" lay-filter="test"></table>
+    <script type="text/html" id="questionTypeTPL">
+        {{# if(d.QuestionType==1){ }}
+           单选
+        {{# }else{ }}
+            多选
+        {{#}}}
+    </script>
+    <script type="text/html" id="actionTpl">
+        <a class="layui-btn layui-btn-xs" href="questionop.html?qid={{d.QuestionGuid}}&stkid={{d.STKGuid}}">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    </script>
+
+    <script type="text/javascript" src="../scripts/layui/layui.js"></script>
+    <script>
+        layui.use(["table"], function () {
+            var $ = layui.jquery;
+            var table = layui.table;
+            var _handlers = {
+                getQueryString: function (name) {
+                    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+                    var r = window.location.search.substr(1).match(reg);
+                    if (r != null) return unescape(r[2]); return null;
+                },
+                show: function () {
+                    window.location.href = "questionop.html?stkid=" + _handlers.getQueryString("id");
+                }
+            };
+            $("#btnAdd").click(function () {
+                _handlers.show();
+            });
+
+            table.render({
+                id: "questionlist",
+                elem: "#questionlist",
+                page: true, limit: 10,
+                cellMinWidth: 100,
+                url: "../tools/QuestionHandler.ashx?action=getlist&stkId="+_handlers.getQueryString("id"),
+                cols: [[{ field:'Number', width:120,title:"题号" }, {field:'QuestionName', title:"试题名称"}, { field:'QuestionScore', width:120,title:"试题分值"}, { field:'QuestionType', width:140,templet:'#questionTypeTPL',title:"类型" }, { field:'QuestionGuid', width:140,templet:'#actionTpl' }]]
+            })
+
+            $("#btnSearch").click(function () {
+                var kw = $.trim($("#txtKw").val());
+                table.reload("userlist", { url: "../tools/QuestionHandler.ashx?action=getlist", where: { kw: kw } });
+            });
+            $("#btnReset").click(function () {
+                $("#txtKw").val("");
+                table.reload("userlist", { url: "../tools/QuestionHandler.ashx?action=getlist", where: { kw: "" } });
+            });
+
+            table.on('tool(test)', function (obj) {
+                var data = obj.data;
+                if (obj.event === 'del') {
+                    layer.confirm('确定要删除该试题?', function (index) {
+                        $.ajax({
+                            url: "../tools/QuestionHandler.ashx",
+                            data: { action: "delete", id: data.QuestionGuid },
+                            dataType: "json",
+                            type: "post",
+                            success: function (json) {
+                                layer.close(index);
+                                var ii = layer.alert(json.msg, function (index) {
+                                    layer.close(ii);
+                                    if (json.status == 1) {
+                                        $("#btnReset").click();
+                                    }
+                                });
+                            }, error: function () { }
+                        })
+                    });
+                }
+            });
+        })
+
+    </script>
+</body>
+</html>

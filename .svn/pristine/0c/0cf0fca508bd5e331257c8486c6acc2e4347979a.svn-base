@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../scripts/layui/css/layui.css" />
+</head>
+<body>
+    <script type="text/html" id="show">
+        <div class="layui-form-item" style="margin-top: 20px;">
+            <label class="layui-form-label"></label>
+                <label class="layui-form-label">
+                    {{#if(d.UserPhoto.length>0){}}
+                    <img class="layui-upload-img" id="demo1" src="{{d.UserPhoto}}" style="width:130px;height:160px;" />
+                    {{#}}}
+                </label>
+            </label></div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                姓名：
+            </label>
+            <label class="layui-form-label"  style="text-align:left">
+                {{d.UserName}}
+            </label>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                手机号码：
+            </label>
+            <label class="layui-form-label"  style="text-align:left">
+                {{d.UserPhone}}
+            </label>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                登录账号：
+            </label>
+            <label class="layui-form-label" style="text-align:left">
+                {{d.LoginName}}
+            </label>
+        </div>
+    </script>
+    <div id="view">
+    </div>
+    <script type="text/javascript" src="../scripts/layui/layui.js"></script>
+    <script>
+        layui.use(["laytpl", "layer"], function () {
+            var laytpl = layui.laytpl;
+            var layer = layui.layer;
+            var $ = layui.jquery;
+
+
+
+            var _handlers = {
+                getQueryString: function (name) {
+                    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+                    var r = window.location.search.substr(1).match(reg);
+                    if (r != null) return unescape(r[2]); return null;
+                }
+            }
+            var id = _handlers.getQueryString("id");
+            if (id) {
+                var getTpl = show.innerHTML, view = document.getElementById('view');
+                var i = layer.load(0, { shade: [0.5, '#fff'] });
+                $.ajax({
+                    url: "../tools/UserHandler.ashx",
+                    data: { action: "detail", id: id },
+                    dataType: "json",
+                    type: "post",
+                    success: function (json) {
+                        layer.close(i);
+                        if (json && json.code == 0) {
+                            laytpl(getTpl).render(json.data, function (html) {
+                                view.innerHTML = html;
+                            });
+                        }
+                    }, error: function () { }
+                })
+            }
+        })
+    </script>
+</body>
+</html>

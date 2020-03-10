@@ -1,0 +1,353 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>试卷查看</title>
+    <meta name="renderer" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <link rel="stylesheet" type="text/css" href="../Scripts/layui/css/layui.css" media="all" />
+    <style>
+        div.paperName {
+            width: 100%;
+            margin-top: 50px;
+            text-align: center;
+            min-height: 35px;
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        div.paperRemark {
+            display: block;
+            padding: 20px;
+            padding-bottom:0px;
+        }
+
+        div.paperContent {
+            padding: 20px;
+            margin-top:50px;
+        }
+
+        div.img {
+            max-width: 80%;
+        }
+
+            div.img img {
+                max-width: 80%;
+            }
+
+        div.layui-colla-item h2.layui-colla-title {
+            height: auto;
+            min-height: 20px;
+            ;
+            line-height: 25px;
+            padding-top: 7px;
+            padding-bottom: 5px;
+        }
+
+            div.layui-colla-item h2.layui-colla-title i {
+                line-height: 42px;
+            }
+
+        div.layui-input-block {
+            margin-left: 0px;
+        }
+
+            div.layui-input-block span {
+                font-size: 18px;
+            }
+        button.layui-btn {
+            width:35%;
+            height:50px;font-size:1.8em; letter-spacing:5px
+        }
+    </style>
+    <meta charset="utf-8" />
+</head>
+<body>
+    <script id="paper" type="text/html">
+        <div class="paperName">{{d.PaperName}}（总分：{{d.ExamScore}}）</div>
+        {{# if(d.Remark){ }}
+        <div class="paperRemark"> {{d.Remark }}</div>
+        {{# } }}
+        {{#  layui.each(d.QuestionList, function(index, item){ }}
+        <a id="{{item.QuestionGuid}}}"></a>
+        {{# }) }}
+        <div class="paperContent">
+            <div class="layui-collapse">
+                {{#  layui.each(d.QuestionList, function(index, item){ }}
+                <div class="layui-colla-item" id="{{item.QuestionGuid}}" {{# if(index>0){ }} style="display:none" {{# } }}>
+                    <h2 class="layui-colla-title" style="padding-left:10px;">
+                        <b>{{index+1 }}.</b>
+                        {{item.QuestionName}}
+                        {{# if(item.QuestionType==1){ }}
+                        （单选）
+                        {{# }else{ }}
+                        （多选）
+                        {{# } }}
+                        {{item.QuestionScore}}分
+                    </h2>
+                    <div class="layui-colla-content layui-show layui-form" lay-filter="answers">
+                        {{# if(item.QuestionImg){ }}
+                        <div class="img">
+                            <img src="{{item.QuestionImg}}" />
+                        </div>
+                        {{# } }}
+                        <div class="layui-form-item">
+                            <p style="margin-top:20px;display:block;">选项：<p>
+                                <input type="hidden" id="hdRA_{{item.QuestionGuid}}" value="{{# layui.each(item.AnswerItem,function(ii,answerItem){ }}{{# if(answerItem.IsRightAnswer==1){}};{{answerItem.AnswerGuid}}{{# } }}{{# }) }}" />
+                                {{# layui.each(item.AnswerItem,function(ii,answerItem){ }}
+                                {{# if(item.QuestionType==1){ }}
+                                <div class="layui-input-block">
+                                    <input type="radio" name="{{ item.QuestionGuid }}" _qid="{{ item.QuestionGuid}}" _s="{{item.QuestionScore}}" lay-filter="answerItemRadio" value="{{answerItem.AnswerGuid}}" lay-skin="primary" title="{{d.AnswerWords[ii]}}：{{answerItem.AnswerName}}" {{# if(d.UserSelectAnswers.getIndex(answerItem.AnswerGuid)>-1){ }} checked{{# } }} />
+                                </div>
+                                {{#  }else{ }}
+                                <div class="layui-input-block">
+                                    <input type="checkbox" name="answer[{{ answerItem.AnswerGuid }}]" _qid="{{ item.QuestionGuid}}" _s="{{item.QuestionScore}}" lay-filter="answerItemCheckBox" value="{{answerItem.AnswerGuid}}" lay-skin="primary" title="{{d.AnswerWords[ii]}}：{{answerItem.AnswerName}}" {{# if(d.UserSelectAnswers.getIndex(answerItem.AnswerGuid)>-1){ }} checked{{# } }} />
+                                </div>
+                                {{#  } }}
+                                {{# }) }}
+                        </div>
+                    </div>
+                </div>
+                {{# }) }}
+            </div>
+        </div>
+        <div class="layui-form-item" style="margin-bottom:200px">
+            <div class="layui-input-block" style="margin-left:0px; text-align:center;margin-bottom:20px;">
+                <span>当前第<label id="spCurrPageNumber">1</label>道题，共{{d.QuestionCount}}道题</span>
+            </div>
+            <div class="layui-input-block" style="margin-left:0px; text-align:center">
+                <button class="layui-btn layui-btn-lg layui-bg-blue" lay-submit="" lay-filter="pre" style='display:none' _c="{{d.QuestionCount}}" _p="0">
+                    上一题
+                </button>
+                <button class="layui-btn layui-btn-lg" lay-submit="" lay-filter="submit" {{# if(d.QuestionCount>1){ }} style='display:none' {{# } }}>
+                    确认提交试卷
+                </button>
+                <button class="layui-btn layui-btn-lg layui-bg-blue" lay-submit="" lay-filter="next" _c="{{d.QuestionCount}}" _p="0" {{# if(d.QuestionCount==1){ }} style='display:none' {{# } }}>
+                    下一题
+                </button>
+            </div>
+        </div>
+    </script>
+    <div id="view"></div>
+    <script type="text/javascript" src="../Scripts/layui/layui.js"></script>
+    <script>
+        layui.use(["form", "element", "laytpl"], function () {
+            var $ = layui.jquery, form = layui.form, laytpl = layui.laytpl;
+            var _param = { _ANSWER: {} };
+            var _handler = {
+                getQueryString: function (name) {
+                    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+                    var r = window.location.search.substr(1).match(reg);
+                    if (r != null) return unescape(r[2]); return null;
+                },
+                _GETPAPER: function () {
+                    var i = layer.load(0, { shade: [0.5, '#fff'] });
+                    var id = _handler.getQueryString("id");
+                    var userGuid = _handler.getQueryString("uid");
+                    $.ajax({
+                        url: "../tools/UserPaperHandler.ashx",
+                        data: { action: "getpaper", id: id, uid: userGuid },
+                        dataType: "json",
+                        type: "post",
+                        success: function (json) {
+                            layer.close(i);
+                            if (json && json.code == 0) {
+                                var s = _handler.getQueryString("s");
+                                if (json.data["IsAnswered"] == 0) {
+
+                                    var data = json.data;
+                                    data["ExamScore"] = s;
+                                    data["AnswerWords"] = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+
+                                    var paperData = layui.data("USERPAPER_" + id + "_" + userGuid);
+                                    var userSelectAnswers = [];
+                                    if (paperData) {
+                                        for (var item in paperData) {
+                                            var answers = paperData[item];
+                                            var selectAnswer = answers["UserAnswers"] || [];
+                                            for (var k = 0; k < selectAnswer.length; k++) {
+                                                userSelectAnswers.push(selectAnswer[k]);
+                                            }
+                                        }
+                                    }
+                                    data["UserSelectAnswers"] = userSelectAnswers;
+                                    data["QuestionCount"] = json.total;
+                                    var getTpl = paper.innerHTML, view = document.getElementById('view');
+                                    laytpl(getTpl).render(data, function (html) {
+                                        view.innerHTML = html;
+                                        form.render('checkbox', "answers");
+                                        form.render('radio', "answers");
+                                        form.on('checkbox(answerItemCheckBox)', function (data) {
+                                            var qId = $(data.elem).attr("_qid");
+                                            var val = data.value;
+                                            var rightAnswer = $("#hdRA_" + qId).val().substr(1).split(';');
+                                            if (data.elem.checked) {
+                                                var arr = layui.data("USERPAPER_" + id + "_" + userGuid)[qId] || {};
+                                                var answerArr = arr["UserAnswers"] || [];
+                                                answerArr.push(val);
+                                                arr["UserAnswers"] = answerArr;
+                                                arr["RightAnswer"] = rightAnswer;
+                                                layui.data("USERPAPER_" + id + "_" + userGuid, { key: qId, value: arr });
+                                            } else {
+                                                var arr = layui.data("USERPAPER_" + id + "_" + userGuid)[qId];
+                                                var answerArr = arr["UserAnswers"] || [];
+                                                var index = answerArr.getIndex(val);
+                                                if (index > -1) {
+                                                    answerArr = answerArr.del(index);
+                                                    arr["UserAnswers"] = answerArr;
+                                                    arr["RightAnswer"] = rightAnswer;
+                                                    layui.data("USERPAPER_" + id + "_" + userGuid, { key: qId, value: arr });
+                                                }
+                                            }
+                                        });
+                                        form.on('radio(answerItemRadio)', function (data) {
+                                            var qId = $(data.elem).attr("_qid");
+                                            var val = data.value;
+                                            var rightAnswer = $("#hdRA_" + qId).val().substr(1).split(';');
+                                            var arr = layui.data("USERPAPER_" + id + "_" + userGuid)[qId] || {};
+                                            arr = {};
+                                            var answerArr = [];
+                                            answerArr.push(val);
+                                            arr["UserAnswers"] = answerArr;
+                                            arr["RightAnswer"] = rightAnswer;
+                                            layui.data("USERPAPER_" + id + "_" + userGuid, { key: qId, value: arr });
+                                        });
+                                    });
+                                } else {
+                                    window.location.href = "papershow.html?id=" + id + "&s=" + s + "&ds=" + json.data["UserScore"] + "&uid=" + userGuid
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+            _handler._GETPAPER();
+
+            /** 上一题 **/
+            form.on('submit(pre)', function (data) {
+                var c = parseInt($(this).attr("_c"));
+                var p = parseInt($(this).attr("_p"));
+                $("div.layui-colla-item").hide();
+                $("#spCurrPageNumber").html(p);
+                p--;
+                $(this).attr("_p", p);
+                $("button[lay-filter='next']").attr("_p", p);
+                var obj = $($("div.layui-colla-item")[p]);
+                obj.show();
+                window.location.hash = "#"+obj.attr("id");
+                
+                if (p ==0) {
+                    $(this).hide();
+                }
+                $("button[lay-filter='submit']").hide();
+                $("button[lay-filter='next']").show();
+                return false;
+            });
+
+            /** 下一题 **/
+            form.on('submit(next)', function (data) {
+                var c = parseInt($(this).attr("_c"));
+                var p = parseInt($(this).attr("_p"));
+                $("div.layui-colla-item").hide();
+                p++;
+                $(this).attr("_p", p);
+                $("button[lay-filter='pre']").attr("_p", p);
+                $("#spCurrPageNumber").html(p+1);
+                var obj = $($("div.layui-colla-item")[p]);
+                obj.show();
+                window.location.hash = "#" + obj.attr("id");
+                
+                if (p == (c - 1)) {
+                    $(this).hide();
+                    $("button[lay-filter='submit']").show();
+                }
+                $("button[lay-filter='pre']").show();
+                return false;
+            });
+
+            form.on('submit(submit)', function (data) {
+                var userGuid = _handler.getQueryString("uid");
+                var examGuid = _handler.getQueryString("id");
+                layer.confirm('提交后不可再次进行回答，确认提交试卷？', { icon: 3, title: '提示' }, function (index) {
+                    var loadingIndex = layer.load(0, { shade: [0.5, '#fff'] });
+                    var submitObj = {};
+                    submitObj["ExamGuid"] = examGuid;
+                    var paperData = layui.data("USERPAPER_" + examGuid + "_" + userGuid);
+                    //alert(JSON.stringify(paperData));
+                    var question = [];
+                    for (var item in paperData) {
+                        var answers = paperData[item];
+                        var rightAnswer = answers["RightAnswer"].sort();
+                        var selectAnswer = answers["UserAnswers"].sort();
+                        var isRight = rightAnswer.Equals(selectAnswer) ? 1 : 0;
+                        question.push({ QuestionGuid: item, RightAnswerGuid: answers["RightAnswer"], SelectAnswerGuid: answers["UserAnswers"], IsRight: isRight });
+                    }
+                    submitObj["Questions"] = question;
+                    layer.close(index);
+                    $.ajax({
+                        url: "../tools/UserPaperHandler.ashx",
+                        data: { action: "submitpaper", json: JSON.stringify(submitObj), uid: userGuid },
+                        dataType: "json",
+                        type: "post",
+                        success: function (json) {
+                            layer.alert(json.msg, function (alertIndex) {
+                                if (json.status == 1) {
+                                    layui.data("USERPAPER_" + examGuid + "_" + userGuid, null); //清除之前的缓存important
+                                    layer.close(loadingIndex);
+                                    layer.close(alertIndex);
+                                } else {
+                                    layer.close(loadingIndex);
+                                    layer.close(alertIndex);
+                                }
+
+                                window.open("", "_self");
+                                window.opener.location.reload();
+                                window.opener = null;
+                                window.close();
+                            });
+                        }
+                    });
+                });
+            });
+        });
+        Array.prototype.Equals = function (array) {
+            // if the other array is a falsy value, return
+            if (!array)
+                return false;
+
+            // compare lengths - can save a lot of time
+            if (this.length != array.length)
+                return false;
+
+            for (var i = 0, l = this.length; i < l; i++) {
+                // Check if we have nested arrays
+                if (this[i] instanceof Array && array[i] instanceof Array) {
+                    // recurse into the nested arrays
+                    if (!this[i].equals(array[i]))
+                        return false;
+                }
+                else if (this[i] != array[i]) {
+                    // Warning - two different object instances will never be equal: {x:20} != {x:20}
+                    return false;
+                }
+            }
+            return true;
+        }
+        Array.prototype.getIndex = function (item) {
+            if (!item || !this.length) return -1;
+            var i = 0,
+                        len = this.length;
+            for (; i < len; i++) {
+                if (this[i] === item) return i;
+            }
+            return -1;
+        };
+
+        Array.prototype.del = function (n) {
+            if (n < 0) return this;
+            return this.slice(0, n).concat(this.slice(n + 1, this.length));
+        };
+
+    </script>
+</body>
+</html>

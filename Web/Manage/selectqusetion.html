@@ -1,0 +1,190 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="../scripts/layui/css/layui.css" />
+    <style>
+        body {
+            padding: 15px;
+        }
+        p.questionItem {
+            display:inline-block;
+            width:100%;
+        }
+       div#qlist div.layui-form-checkbox  span{
+       height:auto;white-space:normal; 
+	word-break:break-all; 
+	overflow:hidden;
+             }
+    </style>
+    <meta charset="utf-8" />
+</head>
+<body>
+    <form class="layui-form" name="examtk">
+        <div class="layui-form-item" style="margin-top: 20px;">
+            <label class="layui-form-label">
+                试题库名称
+            </label>
+            <div class="layui-input-inline">
+                <select name="stk" lay-verify="" id="sltstk" lay-filter="stklist"></select>
+            </div>
+            <div class="layui-form-mid layui-word-aux"> 已选试题分值：<b style="color:#FF5722" id="selectScore">0</b>分</div>
+        </div>
+        <div class="layui-form-item" id="plQustions" style="display:none">
+            <div class="layui-tab layui-tab-card">
+                <ul class="layui-tab-title">
+                    <li class="layui-this"><input type="checkbox" name="" title="试题列表" lay-skin="primary" lay-filter="checkAll" /></li>
+                </ul>
+                <div class="layui-tab-content" style="height: auto;">
+                    <div class="layui-tab-item layui-show">
+                        <div class="layui-form" id="qlist" lay-filter="qlist" ></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <script type="text/javascript" src="../scripts/layui/layui.js"></script>
+    <script>
+        layui.use(["form", "element"], function () {
+            var form = layui.form, $ = layui.jquery;
+            layui.data('selectedQuestions', {});//临时存储
+            var _param = { _SELECTSTK: "" };
+            form.on('checkbox(checkAll)', function (data) {
+                if (data.elem.checked) {
+                    $("#qlist div.layui-form-checkbox:not(.layui-form-checked)").click();
+                } else {
+                    $("#qlist div.layui-form-checked").click();
+                }
+            });
+            form.on('checkbox(CHKitemQuestion)', function (data) {
+                if (data.elem.checked) {
+                    var arr = layui.data('selectedQuestions')[_param._SELECTSTK];
+                    arr.push({ val: data.value, name: $(data.elem).attr("title"), score: $(data.elem).attr("_s") });
+                    layui.data('selectedQuestions', { key: _param._SELECTSTK, value: arr });
+                    var score = 0.0;
+                    for (var i = 0; i < arr.length; i++) {
+                        score += parseFloat(arr[i]["score"]);
+                    }
+                    $("#selectScore").html(score);
+                    layui.data('selectedQuestions', { key: "totalScore", value: score });
+                } else {
+                    var arr = layui.data('selectedQuestions')[_param._SELECTSTK];
+                    var obj = { val: data.value, name: $(data.elem).attr("title"), score: $(data.elem).attr("_s") }
+                    var index = arr.getIndex(obj);
+                    arr = arr.del(index);
+                    layui.data('selectedQuestions', { key: _param._SELECTSTK, value: arr })
+                    var score = 0.0;
+                    for (var i = 0; i < arr.length; i++) {
+                        score += parseFloat(arr[i]["score"]);
+                    }
+                    $("#selectScore").html(score);
+                    layui.data('selectedQuestions', { key: "totalScore", value: score });
+                }
+            });
+            var _handler = {
+                _GETLIST: function (kw) {
+                    var loadingIndex = layer.load(0, { shade: [0.5, '#fff'] });
+                    $("#selectScore").html(layui.data('selectedQuestions')["totalScore"] || "0.0");
+                    $.ajax({
+                        url: "../tools/ExamHandler.ashx",
+                        data: { action: "stklist", kw: kw, limit: 9999 },
+                        dataType: "json",
+                        type: "post",
+                        success: function (json) {
+                            layer.close(loadingIndex);
+                            if (json && json.code === 0) {
+                                var html = "<option value=''>请选择</option>"
+                                for (var i = 0; i < json.data.length; i++) {
+                                    var obj = json.data[i];
+                                    html += "<option value=\"" + obj["STKGuid"] + "\">" + _handler.toASCII(obj["STKName"]) + "</option>";
+                                }
+                                $("#sltstk").html(html);
+                                form.render('select');
+                                form.on('select(stklist)', function (data) {
+                                    var val = data.value;
+                                    if (val) {
+                                        _param._SELECTSTK = val;
+                                        var arr = layui.data('selectedQuestions')[_param._SELECTSTK] || [];
+                                        layui.data('selectedQuestions', { key: val, value: arr });
+                                        _handler._GETQUESTIONS(val, arr);
+                                    }
+                                });
+                            }
+                        }, error: function () { }
+                    })
+                },
+                _GETQUESTIONS: function (stkGuid, arr) {
+                    var loadingIndex = layer.load(0, { shade: [0.5, '#fff'] });
+                    $.ajax({
+                        url: "../tools/QuestionHandler.ashx",
+                        data: { action: "getlist", kw: "", stkId: stkGuid, limit: 9999 },
+                        dataType: "json",
+                        type: "post",
+                        success: function (json) {
+                            layer.close(loadingIndex);
+                            var html = "";
+                            if (json && json.code === 0) {
+                                if (json.data.length) {
+                                    for (var i = 0; i < json.data.length; i++) {
+                                        var obj = json.data[i];
+                                        var typeName = obj["QuestionType"] == 1 ? "单选" : "多选";
+                                        var index = arr.getIndex({ val: obj["QuestionGuid"] });
+                                        var isChecked = index > -1 ? "checked='checked'" : "";
+                                        html += "<div class=\"layui-input-block\" style=\"padding:0;margin:0\"><input type=\"checkbox\" lay-filter=\"CHKitemQuestion\" " + isChecked + " _s=" + obj["QuestionScore"] + " value=\"" + obj["QuestionGuid"] + "\" title=\"[" + $.trim(obj["Number"]) + "]" + _handler.toASCII(obj["QuestionName"]) + "    " + typeName + "（" + obj["QuestionScore"] + " 分）" + "\" lay-skin=\"primary\" /></div>";
+                                    }
+                                    $("#qlist").html(html);
+                                    form.render('checkbox');
+                                   
+                                } else {
+                                    $("#qlist").html("该题库下无试题！！！");
+                                }
+                            } else {
+                                $("#qlist").html("获取题库试题列表失败！！！");
+                            }
+                            $("#plQustions").show();
+                            var width = $("div#qlist").width();
+                            $("div#qlist div.layui-form-checkbox  span").width(width - 60);
+                        }, error: function () { }
+                    })
+                }
+                ,
+                toASCII: function (str) {
+                    if (!str) return "";
+                    var s = "";
+                    s = str.replace(/&/g, "&#38;");
+                    s = s.replace(/</g, "&#60;");
+                    s = s.replace(/>/g, "&#62;");
+                    s = s.replace(/ /g, "&#32;");
+                    s = s.replace(/\'/g, "&#39;");
+                    s = s.replace(/\"/g, "&#34;");
+                    s = s.replace(/\\/g, "&#92;");
+                    s = s.replace(/\:/g, "&#58;");
+                    s = s.replace(/\n/g, "/r/n");
+                    s = s.replace(/{/g, "&#123;");
+                    s = s.replace(/}/g, "&#125;");
+                    s = s.replace(/\^/g, "&#94;");
+                    s = s.replace(/`/g, "&#60;");
+                    return s;
+                }
+            };
+            _handler._GETLIST();
+        });
+
+        Array.prototype.getIndex = function (item) {
+            if (!item || !this.length) return -1;
+            var i = 0,
+                        len = this.length;
+            for (; i < len; i++) {
+                if (this[i]["val"] == item["val"]) return i;
+            }
+            return -1;
+        };
+
+        Array.prototype.del = function (n) {
+            if (n < 0) return this;
+            return this.slice(0, n).concat(this.slice(n + 1, this.length));
+        };
+
+    </script>
+</body>
+</html>

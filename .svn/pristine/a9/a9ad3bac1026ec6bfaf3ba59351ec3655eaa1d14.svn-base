@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>网络学考教辅助系统-管理后台</title>
+    <meta name="renderer" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <link rel="stylesheet" type="text/css" href="../Scripts/layui/css/layui.css" media="all" />
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+  <div class="layui-header">
+      <div class="layui-logo">网络学考教辅助系统</div>
+    <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item" id="userInfo">
+      </li>
+      <li class="layui-nav-item"><a href="javascript:void(0)" id="btnLoginOut">退出</a></li>
+    </ul>
+  </div>
+  <div class="layui-side layui-bg-black">
+    <div class="layui-side-scroll">
+      <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+        <ul class="layui-nav layui-nav-tree" lay-filter="test">
+            <li class="layui-nav-item layui-this"><a href="userlist.html" target="iframe-main">学生信息管理</a></li>
+            <li class="layui-nav-item"><a href="examtk.html" target="iframe-main">题库管理</a></li>
+            <li class="layui-nav-item">
+                <a href="javascript:;">网络考试</a>
+                <dl class="layui-nav-child">
+                    <dd><a href="paperlist.html" target="iframe-main">试卷维护</a></dd>
+                    <dd><a href="exam.html" target="iframe-main">场次维护</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item">
+                <a href="javascript:;">网络练习</a>
+                <dl class="layui-nav-child">
+                    <dd><a href="practicepaperlist.html" target="iframe-main">练习维护</a></dd>
+                    <dd><a href="practiceexam.html" target="iframe-main">场次维护</a></dd>
+                </dl>
+            </li>
+        </ul>
+    </div>
+  </div>
+  
+  <div class="layui-body">
+    <!-- 内容主体区域 -->
+    <div>
+    <iframe id="iframe-main" src="userlist.html" name="iframe-main" frameborder="0" width="100%">
+    
+    </iframe>
+    </div>
+  </div>
+</div>
+    <script src="../Scripts/layui/layui.js"></script>
+<script>
+    //JavaScript代码区域
+    layui.use('element', function () {
+        var element = layui.element;
+        var $ = layui.jquery;
+        $('#iframe-main').height($(window).height() - 60-50);
+        $(window).resize(function () {
+            $('#iframe-main').height($(window).height() - 60-50);
+        });
+        var key = "UserLoginInfo";
+        var userData = layui.data(key);
+        if (userData) {
+            var isLogined = false;
+            for (var item in userData) {
+                var userObj = userData[item];
+                var src = userObj["UserPhoto"]
+                var html ="";
+                if (src) html = "<img src=\"" + src + "\" class=\"layui-nav-img\" />";
+                var userId = userObj["UserGuid"];
+                var userName = userObj["UserName"];
+                html += userName;
+                $("#userInfo").html(html);
+
+                if (userId) isLogined = true;
+                
+            }
+            if (!isLogined) {
+                window.location.href = "login.html";
+            }
+        }
+        $("#btnLoginOut").click(function () {
+            layui.data(key, null); //清除之前的缓存important
+            window.location.href = "login.html";
+        });
+    });
+</script>
+</body>
+</html>
