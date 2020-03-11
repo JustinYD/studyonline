@@ -19,9 +19,9 @@ public class FileHandler : IHttpHandler {
             //设置文件名
             fileNewName = DateTime.Now.ToString("yyyyMMddHHmmssff") + "_" + System.IO.Path.GetFileName(files[0].FileName);
             //保存文件
-            files[0].SaveAs(context.Server.MapPath("~/Uploads/"+fileNewName));
+            files[0].SaveAs(context.Server.MapPath("/Uploads/"+fileNewName));
             msg = "文件上传成功！";
-            result = "{msg:'" + msg + "',filenewname:'" + fileNewName + "'}";
+            result = "{msg:'" + msg + "',fileurl:'" + "~/Uploads/"+fileNewName + "'}";
         }
         else
         {
