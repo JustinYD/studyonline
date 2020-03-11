@@ -67,9 +67,10 @@
                 <el-divider><i class="el-icon-mobile-phone"></i>  输入课程标题</el-divider>
                 <el-input type="text" v-model="title" autocomplete="off"></el-input>
                 <el-divider><i class="el-icon-mobile-phone"></i>  提交资源</el-divider>
-                <input class="el-input" type="file" @change="getFile($event)"  autocomplete="off">
+                <input class="el-input" type="file" id="filebox" @change="getFile($event)"  autocomplete="off">
                 <el-divider></el-divider>
-                <el-button type="primary" @click="submitForm($event)">提交</el-button>
+                <el-button @click="upload">上传文件</el-button>
+                <el-button v-show="fileflag" type="primary" @click="submitForm($event)">提交</el-button>
                 <el-button @click="reset">重置</el-button>
             </el-dialog>
         </div>
@@ -82,7 +83,8 @@
             dialogFormVisible: false,
             title: '',
             content: '',
-            file:'',
+            file: '',
+            fileflag:false,
             keywords:'',
             tableData: [{
                 title: "第一章",
@@ -158,7 +160,20 @@
                 })
             },
             upload() {
-                console.log(this.title,this.content)
+                $.ajax({
+                        url: "../tools/FileHandler.ashx",
+                        data: this.content ,
+                        //data: formData,
+                        dataType: "json",
+                        type: "post",
+                        contentType:false,
+                        processData:false,
+                        success: function (json) {
+                        console.log(json)
+                    },error: function (er) {
+                        console.log(er)
+                    }
+                    });
             },
             reset() {
                 this.title = this.content=""

@@ -172,6 +172,7 @@
                         return layer.msg('上传失败');
                     }
                     //上传成功
+                    console.log(res)
                     $("#UserPhoto").val(res.data.src)
                 }
                 , error: function () {
