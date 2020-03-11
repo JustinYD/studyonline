@@ -160,9 +160,11 @@
                 })
             },
             upload() {
+                let formData = new FormData();
+                formData.append('content',this.content);
                 $.ajax({
-                        url: "../tools/FileHandler.ashx",
-                        data: this.content ,
+                    url: "../tools/FileHandler.ashx",
+                    data: formData,
                         //data: formData,
                         dataType: "json",
                         type: "post",
