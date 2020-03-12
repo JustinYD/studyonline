@@ -214,6 +214,19 @@
                     }
                     });
             },
+            getlist() {
+                $.ajax({
+                    url: "../tools/StudyHandler.ashx",
+                    data: {action:'getstudylist'},
+                        dataType: "json",
+                        type: "post",
+                    success: function (json) {
+                        console.log(json)
+                    },error: function (er) {
+                        console.log(er)
+                    }
+                    });
+            },
             reset() {
                 this.title = ""
                 this.fileList=[]
@@ -225,6 +238,9 @@
                 this.form = row
                 console.log(this.form)
             }
+        },
+        created() {
+            this.getlist();
         }
         
     })
