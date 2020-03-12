@@ -15,6 +15,36 @@ namespace ExamCommon
         {
             private string _title = "";
             private string _time = "";
+            private string _fileurl = "";
+            private string _filename= "";
+            public string time
+            {
+                set { this._time = value; }
+                get { return this._time; }
+            }
+            public string fileurl
+            {
+                set { this._fileurl = value; }
+                get { return this._fileurl; }
+            }
+            public string filenamel
+            {
+                set { this._filename = value; }
+                get { return this._filename; }
+            }
+            public string title
+            {
+                set { this._title = value; }
+                get { return this._title; }
+            }
+        }
+        public class fileResult
+        {
+            private string _title = "";
+            private string _time = "";
+            private string _msg = "";
+            private string _filename = "";
+            private string _fileurl = "";
             public string time
             {
                 set { this._time = value; }
@@ -24,6 +54,21 @@ namespace ExamCommon
             {
                 set { this._title = value; }
                 get { return this._title; }
+            }
+            public string msg
+            {
+                set { this._msg = value; }
+                get { return this._msg; }
+            }
+            public string fileurl
+            {
+                set { this._fileurl = value; }
+                get { return this._fileurl; }
+            }
+            public string filename
+            {
+                set { this._filename = value; }
+                get { return this._filename; }
             }
         }
         public class JsonResult

@@ -52,6 +52,7 @@
     <Compile Include="QuestionsBLL.cs" />
     <Compile Include="PracticeSTKBLL.cs" />
     <Compile Include="STKBLL.cs" />
+    <Compile Include="StudyBLL.cs" />
     <Compile Include="UserAnswerBLL.cs" />
     <Compile Include="UsersBLL.cs" />
   </ItemGroup>

@@ -55,6 +55,7 @@
     <Compile Include="QuestionsDAL.cs" />
     <Compile Include="PracticeSTKDAL.cs" />
     <Compile Include="STKDAL.cs" />
+    <Compile Include="StudyDAL.cs" />
     <Compile Include="UserAnswerDAL.cs" />
     <Compile Include="UsersDAL.cs" />
   </ItemGroup>

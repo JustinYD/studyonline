@@ -64,12 +64,22 @@
                 </el-table-column>
             </el-table>
             <el-dialog title="添加课程" :visible.sync="dialogFormVisible">
+
                 <el-divider><i class="el-icon-mobile-phone"></i>  输入课程标题</el-divider>
                 <el-input type="text" v-model="title" autocomplete="off"></el-input>
                 <el-divider><i class="el-icon-mobile-phone"></i>  提交资源</el-divider>
-                <input class="el-input" type="file" id="filebox" @change="getFile($event)"  autocomplete="off">
+                <el-upload class="upload-demo"
+                           ref="upload"
+                           action="../tools/FileHandler.ashx"
+                           :file-list="fileList"
+                           :limit="1"
+                           :on-success='uploadSuccess'
+                           :auto-upload="false">
+                    <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+                    <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
+                </el-upload>
+                <!--<input class="el-input" type="file" multiple id="filebox" @change="getFile($event)" autocomplete="off">-->
                 <el-divider></el-divider>
-                <el-button @click="upload">上传文件</el-button>
                 <el-button v-show="fileflag" type="primary" @click="submitForm($event)">提交</el-button>
                 <el-button @click="reset">重置</el-button>
             </el-dialog>
@@ -79,6 +89,7 @@
     var studylist = new Vue({
         el:"#studylist",
         data: {
+            fileList:[],
             loading: false,
             dialogFormVisible: false,
             title: '',
@@ -96,11 +107,7 @@
                 content: "好几个激活工具.pdf",
                 time:''
                 }],
-            form: [{
-                title: '',
-                content: '',
-                time:''
-            }]
+            fileurl:''
         },
         methods: {
             add() {
@@ -109,42 +116,58 @@
             getFile(event) {
                 this.content = event.target.files[0];
             },
+            submitUpload() {
+                this.$refs.upload.submit();
+            },
+            uploadSuccess(response, file, fileList) {
+                this.fileflag = true
+                this.$notify.success({
+                        title: '成功',
+                        message: '上传文件成功！'
+                });
+                this.fileurl = response.fileurl
+                this.content=response.filename
+              },
             submitForm(event) {
+                var this_=this
                 //if (this.title == '' && this.content == '') {
-                if (this.title == '') {
+                if (this_.title == ''&&this_.fileurl=='') {
                     this.$notify.error({
                         title: '错误',
                         message: '请填写标题和内容！'
                     });
+                    return fasle
                 } else {
                     var myDate = new Date()
                     var t = myDate.toLocaleDateString();
                     var t1 = myDate.toLocaleTimeString();
-                    event.preventDefault();
-                    let formData = new FormData();
-                    formData.append('content',this.content);
-                    formData.append('title',this.title);
-                    formData.append('time',t + t1);
-                    formData.append('action','getstudylist');
-                    this.form[0].title = this.title
-                    this.form[0].content = this.content
-                    this.form[0].time = t + t1
-                    this.tableData.push({ title: this.title, content: this.content.name, time: t + t1 })
                     let config = {
                         headers: {
                             'Content-Type': 'multipart/form-data'
                         }
                     }
+                    if (this_.title == '') {
+                        this.$notify.error({
+                            title: '错误',
+                            message: '请填写标题！'
+                        });
+                        return false
+                    }
                     $.ajax({
                         url: "../tools/StudyHandler.ashx",
-                        data: { action: "getstudylist", title: this.title, time: t + t1, content: this.content },
+                        data: { action: "addstudylist", title: this.title, time: t + t1, fileurl: this.fileurl },
                         //data: formData,
                         dataType: "json",
                         type: "post",
-                        contentType:false,
-                        processData:false,
                         success: function (json) {
-                            console.log(json)
+                            this_.tableData.push({ title: json.title, content: this_.content, time: json.time })
+                            this_.title = this_.content = this_.fileurl= ''
+                            this_.fileList = []
+                            this_.dialogFormVisible = this_.fileflag= false
+                            this_.$notify.success({
+                                    title: '成功',
+                                    message: '提交成功！'
+                            });
                         }
                     });
 
@@ -174,15 +197,26 @@
                         if (json.status == 200) {
                             console.log("上传成功")
                         } else {
-                            console.log("上传失败")
+                            this.$notify.error({
+                                title: '错误',
+                                message: '上传失败！请稍后再尝试'
+                            });
                         }
                     },error: function (er) {
-                        console.log(er)
+                        if (er.status == 200) {
+                            console.log(er.responseText)
+                        } else {
+                            this.$notify.error({
+                                title: '错误',
+                                message: '上传失败！请稍后再尝试'
+                            });
+                        }
                     }
                     });
             },
             reset() {
-                this.title = this.content=""
+                this.title = ""
+                this.fileList=[]
             },
             search() {
                 console.log("search")

@@ -49,6 +49,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QuestionsEntity.cs" />
     <Compile Include="STKEntity.cs" />
+    <Compile Include="StudyEntity.cs" />
     <Compile Include="UserAnswerEntity.cs" />
     <Compile Include="UsersEntity.cs" />
   </ItemGroup>
