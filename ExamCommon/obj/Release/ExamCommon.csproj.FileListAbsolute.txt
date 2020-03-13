@@ -7,3 +7,8 @@ C:\Users\1756079855\Desktop\C#考试系统\ExamCommon\bin\Release\ExamCommon.pdb
 C:\Users\1756079855\Desktop\C#考试系统\ExamCommon\obj\Release\ExamCommon.dll
 C:\Users\1756079855\Desktop\C#考试系统\ExamCommon\obj\Release\ExamCommon.pdb
 C:\Users\1756079855\Desktop\C#考试系统\ExamCommon\obj\Release\ExamCommon.csprojAssemblyReference.cache
+C:\Users\1756079855\Desktop\studyonline\ExamCommon\bin\Release\ExamCommon.dll
+C:\Users\1756079855\Desktop\studyonline\ExamCommon\bin\Release\ExamCommon.pdb
+C:\Users\1756079855\Desktop\studyonline\ExamCommon\obj\Release\ExamCommon.csprojAssemblyReference.cache
+C:\Users\1756079855\Desktop\studyonline\ExamCommon\obj\Release\ExamCommon.dll
+C:\Users\1756079855\Desktop\studyonline\ExamCommon\obj\Release\ExamCommon.pdb

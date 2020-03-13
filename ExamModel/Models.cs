@@ -18,7 +18,14 @@ namespace ExamModel
 
         public double UserScore { get; set; }
     }
-    
+    public class StudyListModel
+    {
+        public string title{ get; set; }
+        public string fileurl { get; set; }
+        public string time { get; set; }
+        public string filename { get; set; }
+    }
+
 
     public class PaperQuestionModel : PaperModel {
       public List<QuestionModel> QuestionList { get; set; }

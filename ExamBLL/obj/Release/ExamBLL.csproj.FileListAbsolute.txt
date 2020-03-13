@@ -32,3 +32,15 @@ C:\Users\1756079855\Desktop\C#考试系统\ExamBLL\obj\Release\ExamBLL.csprojAss
 C:\Users\1756079855\Desktop\C#考试系统\ExamBLL\obj\Release\ExamBLL.csproj.CopyComplete
 C:\Users\1756079855\Desktop\C#考试系统\ExamBLL\obj\Release\ExamBLL.dll
 C:\Users\1756079855\Desktop\C#考试系统\ExamBLL\obj\Release\ExamBLL.pdb
+C:\Users\1756079855\Desktop\studyonline\ExamBLL\obj\Release\ExamBLL.csprojAssemblyReference.cache
+C:\Users\1756079855\Desktop\studyonline\ExamBLL\obj\Release\ExamBLL.dll
+C:\Users\1756079855\Desktop\studyonline\ExamBLL\obj\Release\ExamBLL.pdb
+C:\Users\1756079855\Desktop\studyonline\ExamBLL\bin\Release\ExamBLL.dll
+C:\Users\1756079855\Desktop\studyonline\ExamBLL\bin\Release\ExamBLL.pdb
+C:\Users\1756079855\Desktop\studyonline\ExamBLL\bin\Release\ExamCommon.dll
+C:\Users\1756079855\Desktop\studyonline\ExamBLL\bin\Release\ExamDAL.dll
+C:\Users\1756079855\Desktop\studyonline\ExamBLL\bin\Release\ExamModel.dll
+C:\Users\1756079855\Desktop\studyonline\ExamBLL\bin\Release\ExamCommon.pdb
+C:\Users\1756079855\Desktop\studyonline\ExamBLL\bin\Release\ExamDAL.pdb
+C:\Users\1756079855\Desktop\studyonline\ExamBLL\bin\Release\ExamModel.pdb
+C:\Users\1756079855\Desktop\studyonline\ExamBLL\obj\Release\ExamBLL.csproj.CopyComplete

@@ -34,19 +34,19 @@
             </div>
         </div>
         <div>
-            <el-table :data=searchtitle(keywords)
+            <el-table :data="searchtitle(keywords)"
                       border
                       v-loading="loading"
                       element-loading-text="加载数据ing"
                       element-loading-spinner="el-icon-loading"
                       element-loading-background="rgba(0, 0, 0, 0.8)"
-                      height="400"
+                      height="550"
                       style="width: 100%">
                 <el-table-column prop="title"
                                  label="标题"
                                  width="380">
                 </el-table-column>
-                <el-table-column prop="content"
+                <el-table-column prop="filename"
                                  label="内容"
                                  width="590">
                 </el-table-column>
@@ -97,16 +97,7 @@
             file: '',
             fileflag:false,
             keywords:'',
-            tableData: [{
-                title: "第一章",
-                content: "好几个激活工具.pdf",
-                time:''
-            },
-            {
-                title: "第二章",
-                content: "好几个激活工具.pdf",
-                time:''
-                }],
+            tableData: [],
             fileurl:''
         },
         methods: {
@@ -160,7 +151,7 @@
                         dataType: "json",
                         type: "post",
                         success: function (json) {
-                            this_.tableData.push({ title: json.title, content: this_.content, time: json.time })
+                            this_.tableData.push({ title: json.title, fileurl: this_.content, time: json.time })
                             this_.title = this_.content = this_.fileurl= ''
                             this_.fileList = []
                             this_.dialogFormVisible = this_.fileflag= false
@@ -168,6 +159,7 @@
                                     title: '成功',
                                     message: '提交成功！'
                             });
+                            this_.getlist()
                         }
                     });
 
@@ -215,13 +207,22 @@
                     });
             },
             getlist() {
+                var this_=this
                 $.ajax({
                     url: "../tools/StudyHandler.ashx",
                     data: {action:'getstudylist'},
                         dataType: "json",
                         type: "post",
                     success: function (json) {
-                        console.log(json)
+                        if (json.data.length > 0) {
+                            var table = []
+                            
+                            for (let i = 0; i < json.data.length; i++) {
+                                json.data[i].filename=json.data[i].fileurl.substring(26)
+                                table.push(json.data[i])
+                            }
+                            this_.tableData = table
+                        }
                     },error: function (er) {
                         console.log(er)
                     }
@@ -235,8 +236,7 @@
                 console.log("search")
             },
             handleClick(row) {
-                this.form = row
-                console.log(this.form)
+                window.location.href=row.fileurl
             }
         },
         created() {

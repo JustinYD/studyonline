@@ -13,29 +13,17 @@ namespace ExamCommon
         #region 请求返回值
         public class studyResult
         {
-            private string _title = "";
-            private string _time = "";
-            private string _fileurl = "";
-            private string _filename= "";
-            public string time
+            private string _msg = "";
+            private object _data = null;
+            public object data
             {
-                set { this._time = value; }
-                get { return this._time; }
+                set { this._data = value; }
+                get { return this._data; }
             }
-            public string fileurl
+            public string msg
             {
-                set { this._fileurl = value; }
-                get { return this._fileurl; }
-            }
-            public string filenamel
-            {
-                set { this._filename = value; }
-                get { return this._filename; }
-            }
-            public string title
-            {
-                set { this._title = value; }
-                get { return this._title; }
+                set { this._msg = value; }
+                get { return this._msg; }
             }
         }
         public class fileResult

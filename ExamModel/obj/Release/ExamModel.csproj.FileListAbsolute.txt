@@ -7,3 +7,8 @@ C:\Users\1756079855\Desktop\C#考试系统\ExamModel\bin\Release\ExamModel.pdb
 C:\Users\1756079855\Desktop\C#考试系统\ExamModel\obj\Release\ExamModel.dll
 C:\Users\1756079855\Desktop\C#考试系统\ExamModel\obj\Release\ExamModel.pdb
 C:\Users\1756079855\Desktop\C#考试系统\ExamModel\obj\Release\ExamModel.csprojAssemblyReference.cache
+C:\Users\1756079855\Desktop\studyonline\ExamModel\bin\Release\ExamModel.dll
+C:\Users\1756079855\Desktop\studyonline\ExamModel\bin\Release\ExamModel.pdb
+C:\Users\1756079855\Desktop\studyonline\ExamModel\obj\Release\ExamModel.csprojAssemblyReference.cache
+C:\Users\1756079855\Desktop\studyonline\ExamModel\obj\Release\ExamModel.dll
+C:\Users\1756079855\Desktop\studyonline\ExamModel\obj\Release\ExamModel.pdb

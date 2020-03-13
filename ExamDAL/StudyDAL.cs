@@ -100,32 +100,27 @@ namespace ExamDAL
 		/// <summary>
 		/// 得到一个对象实体
 		/// </summary>
-		public STKEntity GetModel(Guid STKGuid)
+		public StudyEntity GetModel(string title)
 		{
 
 			StringBuilder strSql = new StringBuilder();
-			strSql.Append("select  top 1 STKGuid,STKName,CreateTime,Status from T_STK ");
-			strSql.Append(" where STKGuid=@STKGuid ");
+			strSql.Append("select  * from T_Study ");
 			SqlParameter[] parameters = {
-					new SqlParameter("@STKGuid", SqlDbType.UniqueIdentifier)};
-			parameters[0].Value = STKGuid;
+					new SqlParameter("@title", SqlDbType.UniqueIdentifier)};
+			parameters[0].Value = title;
 
-			STKEntity model = new STKEntity();
+			StudyEntity model = new StudyEntity();
 			DataSet ds = DbHelperSQL.Query(strSql.ToString(), parameters);
 			if (ds.Tables[0].Rows.Count > 0)
 			{
-				if (ds.Tables[0].Rows[0]["STKGuid"].ToString() != "")
+				model.title = ds.Tables[0].Rows[0]["title"].ToString();
+				if (ds.Tables[0].Rows[0]["fileurl"].ToString() != "")
 				{
-					model.STKGuid = new Guid(ds.Tables[0].Rows[0]["STKGuid"].ToString());
+					model.fileurl = ds.Tables[0].Rows[0]["fileurl"].ToString();
 				}
-				model.STKName = ds.Tables[0].Rows[0]["STKName"].ToString();
-				if (ds.Tables[0].Rows[0]["CreateTime"].ToString() != "")
+				if (ds.Tables[0].Rows[0]["time"].ToString() != "")
 				{
-					model.CreateTime = ds.Tables[0].Rows[0]["CreateTime"].ToString();
-				}
-				if (ds.Tables[0].Rows[0]["Status"].ToString() != "")
-				{
-					model.Status = int.Parse(ds.Tables[0].Rows[0]["Status"].ToString());
+					model.time = ds.Tables[0].Rows[0]["time"].ToString();
 				}
 				return model;
 			}
@@ -134,39 +129,91 @@ namespace ExamDAL
 				return null;
 			}
 		}
+		public StudyEntity GetStudy()
+		{
 
+			StringBuilder strSql = new StringBuilder();
+			strSql.Append("select  * from T_Study ");
+			SqlParameter[] parameters = {
+					new SqlParameter("@title", SqlDbType.UniqueIdentifier)};
+			parameters[0].Value = "";
+
+			StudyEntity model = new StudyEntity();
+			DataSet ds = DbHelperSQL.Query(strSql.ToString(), parameters);
+			if (ds.Tables[0].Rows.Count > 0)
+			{
+				model.title = ds.Tables[0].Rows[0]["title"].ToString();
+				if (ds.Tables[0].Rows[0]["fileurl"].ToString() != "")
+				{
+					model.fileurl = ds.Tables[0].Rows[0]["fileurl"].ToString();
+				}
+				if (ds.Tables[0].Rows[0]["time"].ToString() != "")
+				{
+					model.time = ds.Tables[0].Rows[0]["time"].ToString();
+				}
+				return model;
+			}
+			else
+			{
+				return null;
+			}
+		}
 		/// <summary>
 		/// 获得数据列表
 		/// </summary>
-		public DataSet GetList(string title)
+		public DataSet GetList()
 		{
 			StringBuilder strSql = new StringBuilder();
 			strSql.Append("select title,fileurl,time ");
 			strSql.Append(" FROM T_Study");
-			if (title.Trim() != "")
-			{
-				strSql.Append(" where " + title);
-			}
 			return DbHelperSQL.Query(strSql.ToString());
 		}
 
 		/// <summary>
 		/// 获得前几行数据
 		/// </summary>
-		public DataSet GetList(string title,string fileurl,string time)
+		public DataSet GetStudyList()
 		{
 			StringBuilder strSql = new StringBuilder();
+			strSql.Append("select title,fileurl,time ");
+			strSql.Append(" FROM T_Study");
+			return DbHelperSQL.Query(strSql.ToString());
+		}
+		public StudyEntity GetStudyModel(string title)
+		{
+			/*StringBuilder strSql = new StringBuilder();
 			strSql.Append("select ");
 			strSql.Append(" title,fileurl,time");
 			strSql.Append(" FROM T_Study");
-			if (title.Trim() != "")
-			{
-				strSql.Append(" where " + title);
-			}
-			strSql.Append(" order by " + fileurl);
-			return DbHelperSQL.Query(strSql.ToString());
-		}
+			DataSet dataSet = DbHelperSQL.Query(strSql.ToString());//数据表查询数据
+			return dataSet;*/
+			StringBuilder strSql = new StringBuilder();
+			strSql.Append("select   ");
+			strSql.Append("title=@title,fileurl,time from T_Study");
+			SqlParameter[] parameters = {
+					new SqlParameter("@title", SqlDbType.UniqueIdentifier)};
+			parameters[0].Value = title;
 
+			StudyEntity model = new StudyEntity();
+			DataSet ds = DbHelperSQL.Query(strSql.ToString());
+			if (ds.Tables[0].Rows.Count > 0)
+			{
+				model.title = ds.Tables[0].Rows[0]["title"].ToString();
+				if (ds.Tables[0].Rows[0]["fileurl"].ToString() != "")
+				{
+					model.fileurl = ds.Tables[0].Rows[0]["fileurl"].ToString();
+				}
+				if (ds.Tables[0].Rows[0]["time"].ToString() != "")
+				{
+					model.time = ds.Tables[0].Rows[0]["time"].ToString();
+				}
+				return model;
+			}
+			else
+			{
+				return null;
+			}
+		}
 		/*
 		/// <summary>
 		/// 分页获取数据列表

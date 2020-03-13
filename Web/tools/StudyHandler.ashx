@@ -32,30 +32,35 @@ public class StudyHandler : IHttpHandler {
         var jsonResult = new ExamCommon.JSONProcessor.fileResult();
         var model = new ExamModel.StudyEntity
         {
-             title = title1,
-             fileurl = fileurl1, 
-             time = time1
-         };
+            title = title1,
+            fileurl = fileurl1,
+            time = time1
+        };
         var bll = new ExamBLL.StudyBLL();
         bll.Add(model);
         jsonResult.title = title1;
         jsonResult.fileurl = fileurl1;
         jsonResult.time = time1;
         jsonResult.msg = "操作成功";
-        
-        
+
+
         jsonResult.fileurl = fileurl1;
         return ExamCommon.JSONProcessor.JsonSerialize(jsonResult);
     }
     private string GetStudyList()
     {
         var jsonResult = new ExamCommon.JSONProcessor.studyResult();
-        var title = HttpContext.Current.Request.Params["title"] + "";
-        var fileurl = HttpContext.Current.Request.Params["fileurl"] + "";
-        var time = HttpContext.Current.Request.Params["time"] + "";
-        jsonResult.title = title;
-        jsonResult.fileurl = fileurl;
-        jsonResult.time = time;
+        try
+        {
+            var bll = new ExamBLL.StudyBLL();
+            var ds = bll.GetStudyList();
+            jsonResult.data = ExamCommon.ConvertUtility.ToList<ExamModel.StudyListModel>(ds.Tables[0]);
+            jsonResult.msg = "成功";
+        }
+        catch(Exception e)
+        {
+            jsonResult.msg = e.Message;
+        }
         return ExamCommon.JSONProcessor.JsonSerialize(jsonResult);
     }
     public bool IsReusable {

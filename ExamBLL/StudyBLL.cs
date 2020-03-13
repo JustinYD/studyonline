@@ -59,23 +59,27 @@ namespace ExamBLL
 		/// <summary>
 		/// 获得数据列表
 		/// </summary>
-		public DataSet GetList(string title)
+		public DataSet GetList()
 		{
-			return dal.GetList(title);
+			return dal.GetList();
 		}
 		/// <summary>
 		/// 获得前几行数据
 		/// </summary>
-		public DataSet GetList(string title, string fileurl, string time)
+		public DataSet GetStudyList()
 		{
-			return dal.GetList(title, fileurl, time);
+			return dal.GetStudyList();
+		}
+		public StudyEntity GetStudyModel(string title)
+		{
+			return dal.GetStudyModel(title);
 		}
 		/// <summary>
 		/// 获得数据列表
 		/// </summary>
-		public List<StudyEntity> GetModelList(string title)
+		public List<StudyEntity> GetModelList()
 		{
-			DataSet ds = dal.GetList(title);
+			DataSet ds = dal.GetList();
 			return DataTableToList(ds.Tables[0]);
 		}
 		/// <summary>
@@ -105,7 +109,7 @@ namespace ExamBLL
 		/// </summary>
 		public DataSet GetAllList()
 		{
-			return GetList("");
+			return GetList();
 		}
 
 		/// <summary>
