@@ -83,6 +83,12 @@
                 <el-button v-show="fileflag" type="primary" @click="submitForm($event)">提交</el-button>
                 <el-button @click="reset">重置</el-button>
             </el-dialog>
+            <el-dialog :title="form.title" :visible.sync="dialogFormVisible1" width="1000px" >
+                <video :src="form.fileurl" controls="controls" height="100%" width="100%"></video>
+            </el-dialog>
+            <el-dialog :title="form.title" :visible.sync="dialogFormVisible2" width="1000px" fullscreen="true">
+                <iframe :src="fileurl" width="100%" height="550px"></iframe>
+            </el-dialog>
         </div>
     </div>
 <script>
@@ -92,15 +98,44 @@
             fileList:[],
             loading: false,
             dialogFormVisible: false,
+            dialogFormVisible1: false,
+            dialogFormVisible2: false,
             title: '',
             content: '',
             file: '',
             fileflag:false,
-            keywords:'',
+            keywords: '',
+            form: {},
             tableData: [],
             fileurl:''
         },
         methods: {
+            handleClick(row) {
+                this.form = {}
+                this.fileurl=""
+                var type = this.gettype(row.fileurl)
+                
+                if (type == ".mp4" || type == ".rmvb" || type == ".avi") {
+                    this.form = row
+                    this.dialogFormVisible1 = true
+                } else if (type == ".pdf") {
+
+                    this.fileurl = "http://localhost:26408/PDF.js/web/viewer.html?file="+ row.fileurl
+                    console.log(this.fileurl)
+                    this.form = row
+                    this.dialogFormVisible2 = true
+                    
+                } else if( type == ".xlsx" || type == ".doc" || type == ".docx" || type == ".ppt") {
+                    window.location.href = row.fileurl
+                }
+            },
+            gettype(file) {
+                var filename=file;
+                var index1=filename.lastIndexOf(".");
+                var index2=filename.length;
+                var postf = filename.substring(index1, index2);//后缀名
+                return postf
+            },
             add() {
                 this.dialogFormVisible=true
             },
@@ -234,9 +269,6 @@
             },
             search() {
                 console.log("search")
-            },
-            handleClick(row) {
-                window.location.href=row.fileurl
             }
         },
         created() {
