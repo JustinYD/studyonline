@@ -83,15 +83,15 @@ namespace ExamDAL
 		/// <summary>
 		/// 删除一条数据
 		/// </summary>
-		public void Delete(string title)
+		public void Delete(string fileurl)
 		{
 
 			StringBuilder strSql = new StringBuilder();
 			strSql.Append("delete from T_Study ");
-			strSql.Append(" where title=@title ");
+			strSql.Append(" where fileurl=@fileurl ");
 			SqlParameter[] parameters = {
-					new SqlParameter("@title", SqlDbType.UniqueIdentifier)};
-			parameters[0].Value = title;
+					new SqlParameter("@fileurl", SqlDbType.UniqueIdentifier)};
+			parameters[0].Value = fileurl;
 
 			DbHelperSQL.ExecuteSql(strSql.ToString(), parameters);
 		}

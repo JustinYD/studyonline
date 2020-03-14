@@ -23,6 +23,12 @@
                 <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
                 <ul class="layui-nav layui-nav-tree" lay-filter="test">
                     <li class="layui-nav-item layui-nav-itemed">
+                        <a href="javascript:;">我的学习</a>
+                        <dl class="layui-nav-child" id="studymenulist">
+                            <a href="study.html" target="iframe-main">开始学习</a>
+                        </dl>
+                    </li>
+                    <li class="layui-nav-item layui-nav-itemed">
                         <a href="javascript:;">我的考试</a>
                         <dl class="layui-nav-child" id="menulist">
                             <dd>加载中...</dd>
@@ -84,7 +90,7 @@
                     practicemenuHtml += "<dd><a href=\"practiceexam.html?t=1&uid=" + userId + "\" target=\"iframe-main\">进入练习</a></dd>";
                     $("#menulist").html(menuHtml);
                     $("#practicemenulist").html(practicemenuHtml);
-                    $("#iframe-main").attr("src", "exam.html?t=1&uid=" + userId);
+                    $("#iframe-main").attr("src", "study.html?t=1&uid=" + userId);
                     if (userId) isLogined = true;
                 }
                 $("#userInfo a[_target='unbindWx']").click(function () {

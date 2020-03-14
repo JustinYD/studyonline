@@ -40,10 +40,10 @@ namespace ExamBLL
 		/// <summary>
 		/// 删除一条数据
 		/// </summary>
-		public void Delete(string title)
+		public void Delete(string fileurl)
 		{
 
-			dal.Delete(title);
+			dal.Delete(fileurl);
 		}
 
 		/// <summary>

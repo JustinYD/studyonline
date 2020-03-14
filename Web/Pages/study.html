@@ -1,0 +1,298 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>发布学习</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <link rel="stylesheet" type="text/css" href="../Scripts/layui/css/layui.css" media="all" />
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="../Scripts/jquery-3.2.1.js"></script>
+    <style>
+        body {
+            padding: 15px;
+            overflow-y: scroll;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="studylist">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <el-button round  type="primary">学习列表</el-button>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">
+                    学习标题
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" v-model="keywords" lay-verify="required" autocomplete="off" class="layui-input" />
+                </div>
+                <el-button circle type="primary"><i class="el-icon-search"></i></el-button>
+            </div>
+        </div>
+        <div>
+            <el-table :data="searchtitle(keywords)"
+                      border
+                      v-loading="loading"
+                      element-loading-text="加载数据ing"
+                      element-loading-spinner="el-icon-loading"
+                      element-loading-background="rgba(0, 0, 0, 0.8)"
+                      height="550"
+                      style="width: 100%">
+                <el-table-column prop="title"
+                                 label="标题"
+                                 width="380">
+                </el-table-column>
+                <el-table-column prop="filename"
+                                 label="内容"
+                                 width="590">
+                </el-table-column>
+                <el-table-column prop="time"
+                                 label="时间"
+                                 width="220">
+                </el-table-column>
+                <el-table-column fixed="right"
+                                 label="操作"
+                                 width="100">
+                    <template slot-scope="scope">
+                        <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <el-dialog :title="form.title" :visible.sync="dialogFormVisible1" width="1000px">
+                <video :src="form.fileurl" controls="controls" height="100%" width="100%"></video>
+            </el-dialog>
+            <el-dialog :title="form.title" :visible.sync="dialogFormVisible2" width="1000px" :fullscreen="fullscreen">
+                <iframe :src="fileurl" width="100%" height="550px"></iframe>
+            </el-dialog>
+            <el-dialog :title="form.title" :visible.sync="dialogFormVisible3" width="1000px">
+                <iframe :src="fileurl" width="100%" height="550px"></iframe>
+            </el-dialog>
+        </div>
+    </div>
+    <script>
+    var studylist = new Vue({
+        el:"#studylist",
+        data: {
+            uploadflag: false,
+            fileList: [],
+            fullscreen: true,
+            loading: false,
+            dialogFormVisible: false,
+            dialogFormVisible1: false,
+            dialogFormVisible2: false,
+            dialogFormVisible3: false,
+            dialogFormVisible4: false,
+            title: '',
+            content: '',
+            file: '',
+            fileflag:false,
+            keywords: '',
+            form: {},
+            tableData: [],
+            fileurl:''
+        },
+        methods: {
+            deletelist() {
+                var this_=this
+                var fileurl=this.form.fileurl
+                $.ajax({
+                        url: "../tools/StudyHandler.ashx",
+                        data: { action: "delstudylist", fileurl: fileurl },
+                        //data: formData,
+                        dataType: "json",
+                        type: "post",
+                        success: function (json) {
+                            this_.dialogFormVisible4 = false
+                            this_.$message.success({
+                                    title: '成功',
+                                    message: '删除成功！'
+                            });
+                            this_.getlist()
+                        }
+                    });
+            },
+            update() {
+                this.uploadflag=true
+            },
+            handleClick(row) {
+                this.form = {}
+                this.fileurl=""
+                var type = this.gettype(row.fileurl)
+
+                if (type == ".mp4" || type == ".rmvb" || type == ".avi" ) {
+                    this.form = row
+                    this.dialogFormVisible1 = true
+                } else if (type == ".pdf") {
+
+                    this.fileurl = "http://localhost:26408/PDF.js/web/viewer.html?file=" + row.fileurl
+                    console.log(this.fileurl)
+                    this.form = row
+                    this.dialogFormVisible2 = true
+
+                } else if (type == ".xlsx" || type == ".doc" || type == ".docx" || type == ".ppt") {
+                    window.location.href = row.fileurl
+                } else if (type == ".png" || type == ".jpg"||type==".txt") {
+                    this.form = row
+                    this.dialogFormVisible3 = true
+                    this.fileurl=row.fileurl
+                }
+            },
+            gettype(file) {
+                var filename=file;
+                var index1=filename.lastIndexOf(".");
+                var index2=filename.length;
+                var postf = filename.substring(index1, index2);//后缀名
+                return postf
+            },
+            option(row) {
+                this.form = row
+                this.dialogFormVisible4 = true
+                this.uploadflag=false
+            },
+            add() {
+                this.dialogFormVisible=true
+            },
+            getFile(event) {
+                this.content = event.target.files[0];
+            },
+            submitUpload() {
+                this.$refs.upload.submit();
+            },
+            uploadSuccess(response, file, fileList) {
+                this.fileflag = true
+                this.$notify.success({
+                        title: '成功',
+                        message: '上传文件成功！'
+                });
+                this.fileurl = response.fileurl
+                this.content=response.filename
+              },
+            submitForm(event) {
+                var this_=this
+                //if (this.title == '' && this.content == '') {
+                if (this_.title == ''&&this_.fileurl=='') {
+                    this.$notify.error({
+                        title: '错误',
+                        message: '请填写标题和内容！'
+                    });
+                    return fasle
+                } else {
+                    var myDate = new Date()
+                    var t = myDate.toLocaleDateString();
+                    var t1 = myDate.toLocaleTimeString();
+                    let config = {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }
+                    if (this_.title == '') {
+                        this.$notify.error({
+                            title: '错误',
+                            message: '请填写标题！'
+                        });
+                        return false
+                    }
+                    $.ajax({
+                        url: "../tools/StudyHandler.ashx",
+                        data: { action: "addstudylist", title: this.title, time: t + t1, fileurl: this.fileurl },
+                        //data: formData,
+                        dataType: "json",
+                        type: "post",
+                        success: function (json) {
+                            this_.tableData.push({ title: json.title, fileurl: this_.content, time: json.time })
+                            this_.title = this_.content = this_.fileurl= ''
+                            this_.fileList = []
+                            this_.dialogFormVisible = this_.fileflag= false
+                            this_.$notify.success({
+                                    title: '成功',
+                                    message: '提交成功！'
+                            });
+                            this_.getlist()
+                        }
+                    });
+
+
+
+                }
+            },
+            searchtitle(keywords) {
+                return this.tableData.filter(item => {
+                    if(item.title.includes(keywords)){
+                        return item;
+                    }
+                })
+            },
+            upload() {
+                let formData = new FormData();
+                formData.append('content',this.content);
+                $.ajax({
+                    url: "../tools/FileHandler.ashx",
+                    data: formData,
+                        //data: formData,
+                        dataType: "json",
+                        type: "post",
+                        contentType:false,
+                        processData:false,
+                    success: function (json) {
+                        if (json.status == 200) {
+                            console.log("上传成功")
+                        } else {
+                            this.$notify.error({
+                                title: '错误',
+                                message: '上传失败！请稍后再尝试'
+                            });
+                        }
+                    },error: function (er) {
+                        if (er.status == 200) {
+                            console.log(er.responseText)
+                        } else {
+                            this.$notify.error({
+                                title: '错误',
+                                message: '上传失败！请稍后再尝试'
+                            });
+                        }
+                    }
+                    });
+            },
+            getlist() {
+                var this_=this
+                $.ajax({
+                    url: "../tools/StudyHandler.ashx",
+                    data: {action:'getstudylist'},
+                        dataType: "json",
+                        type: "post",
+                    success: function (json) {
+                        if (json.data.length > 0) {
+                            var table = []
+
+                            for (let i = 0; i < json.data.length; i++) {
+                                json.data[i].filename=json.data[i].fileurl.substring(26)
+                                table.push(json.data[i])
+                            }
+                            this_.tableData = table
+                        }
+                    },error: function (er) {
+                        console.log(er)
+                    }
+                    });
+            },
+            reset() {
+                this.title = ""
+                this.fileList=[]
+            },
+            search() {
+                console.log("search")
+            }
+        },
+        created() {
+            this.getlist();
+        }
+
+    })
+    </script>
+</body>
+</html>

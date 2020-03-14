@@ -59,7 +59,7 @@
                                  width="100">
                     <template slot-scope="scope">
                         <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>
-                        <el-button type="text" size="small">编辑</el-button>
+                        <el-button type="text" size="small" @click="option(scope.row)">编辑</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -83,11 +83,36 @@
                 <el-button v-show="fileflag" type="primary" @click="submitForm($event)">提交</el-button>
                 <el-button @click="reset">重置</el-button>
             </el-dialog>
-            <el-dialog :title="form.title" :visible.sync="dialogFormVisible1" width="1000px" >
+            <el-dialog :title="form.title" :visible.sync="dialogFormVisible1" width="1000px">
                 <video :src="form.fileurl" controls="controls" height="100%" width="100%"></video>
             </el-dialog>
-            <el-dialog :title="form.title" :visible.sync="dialogFormVisible2" width="1000px" fullscreen="true">
+            <el-dialog :title="form.title" :visible.sync="dialogFormVisible2" width="1000px" :fullscreen="fullscreen">
                 <iframe :src="fileurl" width="100%" height="550px"></iframe>
+            </el-dialog>
+            <el-dialog :title="form.title" :visible.sync="dialogFormVisible3" width="1000px">
+                <iframe :src="fileurl" width="100%" height="550px"></iframe>
+            </el-dialog>
+            <el-dialog :title="form.title" :visible.sync="dialogFormVisible4" width="700px">
+                <el-divider><i class="el-icon-mobile-phone"></i>  输入课程标题</el-divider>
+                <el-input type="text" v-model="form.title" autocomplete="off"></el-input>
+                <el-divider><i class="el-icon-mobile-phone"></i>  提交资源</el-divider>
+                <el-input type="text" v-show="!uploadflag" v-model="form.fileurl" autocomplete="off"></el-input>
+                <el-divider></el-divider>
+                <el-upload v-if="uploadflag" class="upload-demo"
+                           ref="upload"
+                           action="../tools/FileHandler.ashx"
+                           :file-list="fileList"
+                           :limit="1"
+                           :on-success='uploadSuccess'
+                           :auto-upload="false">
+                    <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+                    <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
+                    <el-divider></el-divider>
+                </el-upload>
+                <el-button size="small" type="primary" @click="update">更新</el-button>
+                <el-button size="small" type="danger" @click="deletelist">删除</el-button>
+
+
             </el-dialog>
         </div>
     </div>
@@ -95,11 +120,15 @@
     var studylist = new Vue({
         el:"#studylist",
         data: {
-            fileList:[],
+            uploadflag: false,
+            fileList: [],
+            fullscreen: true,
             loading: false,
             dialogFormVisible: false,
             dialogFormVisible1: false,
             dialogFormVisible2: false,
+            dialogFormVisible3: false,
+            dialogFormVisible4: false,
             title: '',
             content: '',
             file: '',
@@ -110,23 +139,49 @@
             fileurl:''
         },
         methods: {
+            deletelist() {
+                var this_=this
+                var fileurl=this.form.fileurl
+                $.ajax({
+                        url: "../tools/StudyHandler.ashx",
+                        data: { action: "delstudylist", fileurl: fileurl },
+                        //data: formData,
+                        dataType: "json",
+                        type: "post",
+                        success: function (json) {
+                            this_.dialogFormVisible4 = false
+                            this_.$message.success({
+                                    title: '成功',
+                                    message: '删除成功！'
+                            });
+                            this_.getlist()
+                        }
+                    });
+            },
+            update() {
+                this.uploadflag=true
+            },
             handleClick(row) {
                 this.form = {}
                 this.fileurl=""
                 var type = this.gettype(row.fileurl)
-                
-                if (type == ".mp4" || type == ".rmvb" || type == ".avi") {
+
+                if (type == ".mp4" || type == ".rmvb" || type == ".avi" ) {
                     this.form = row
                     this.dialogFormVisible1 = true
                 } else if (type == ".pdf") {
 
-                    this.fileurl = "http://localhost:26408/PDF.js/web/viewer.html?file="+ row.fileurl
+                    this.fileurl = "http://localhost:26408/PDF.js/web/viewer.html?file=" + row.fileurl
                     console.log(this.fileurl)
                     this.form = row
                     this.dialogFormVisible2 = true
-                    
-                } else if( type == ".xlsx" || type == ".doc" || type == ".docx" || type == ".ppt") {
+
+                } else if (type == ".xlsx"|| type == ".doc"  || type == ".docx" || type == ".ppt") {
                     window.location.href = row.fileurl
+                } else if (type == ".png" || type == ".jpg"||type==".txt") {
+                    this.form = row
+                    this.dialogFormVisible3 = true
+                    this.fileurl=row.fileurl
                 }
             },
             gettype(file) {
@@ -135,6 +190,11 @@
                 var index2=filename.length;
                 var postf = filename.substring(index1, index2);//后缀名
                 return postf
+            },
+            option(row) {
+                this.form = row
+                this.dialogFormVisible4 = true
+                this.uploadflag=false
             },
             add() {
                 this.dialogFormVisible=true

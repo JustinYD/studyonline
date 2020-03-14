@@ -2,6 +2,8 @@
 
 using System;
 using System.Web;
+using System.IO;
+    using System.Data.SqlClient;
 
 public class StudyHandler : IHttpHandler {
     private string Action { get { return HttpContext.Current.Request.Params["action"] + ""; } }
@@ -20,6 +22,8 @@ public class StudyHandler : IHttpHandler {
                 return AddStudyList();
             case "getstudylist":
                 return GetStudyList();
+            case "delstudylist":
+                return DelStudyList();
             default:
                 return "{}";
         }
@@ -45,6 +49,26 @@ public class StudyHandler : IHttpHandler {
 
 
         jsonResult.fileurl = fileurl1;
+        return ExamCommon.JSONProcessor.JsonSerialize(jsonResult);
+    }
+    private string DelStudyList()
+    {
+        var jsonResult = new ExamCommon.JSONProcessor.studyResult();
+        var fileurl = HttpContext.Current.Request.Params["fileurl"] + "";
+        try
+        {
+            var bll = new ExamBLL.StudyBLL();
+            if (ExamDAL.DbHelperSQL.ExecuteSql("DELETE T_Study  WHERE fileurl=@fileurl", new SqlParameter("@fileurl", fileurl)) > 0)
+            {
+                string URL = HttpContext.Current.Server.MapPath(fileurl);
+                File.Delete(URL);
+                jsonResult.msg = "删除成功";
+            }
+        }
+        catch(Exception e)
+        {
+            jsonResult.msg = e.Message;
+        }
         return ExamCommon.JSONProcessor.JsonSerialize(jsonResult);
     }
     private string GetStudyList()
