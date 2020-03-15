@@ -3,7 +3,7 @@
 using System;
 using System.Web;
 using System.IO;
-    using System.Data.SqlClient;
+using System.Data.SqlClient;
 
 public class StudyHandler : IHttpHandler {
     private string Action { get { return HttpContext.Current.Request.Params["action"] + ""; } }
@@ -24,6 +24,8 @@ public class StudyHandler : IHttpHandler {
                 return GetStudyList();
             case "delstudylist":
                 return DelStudyList();
+            case "updatestudylist":
+                return Updatestudylist();
             default:
                 return "{}";
         }
@@ -63,6 +65,29 @@ public class StudyHandler : IHttpHandler {
                 string URL = HttpContext.Current.Server.MapPath(fileurl);
                 File.Delete(URL);
                 jsonResult.msg = "删除成功";
+            }
+        }
+        catch(Exception e)
+        {
+            jsonResult.msg = e.Message;
+        }
+        return ExamCommon.JSONProcessor.JsonSerialize(jsonResult);
+    }
+    private string Updatestudylist()
+    {
+        var jsonResult = new ExamCommon.JSONProcessor.studyResult();
+        var fileurl = HttpContext.Current.Request.Params["fileurl"] + "";
+        var oldfileurl = HttpContext.Current.Request.Params["oldfileurl"] + "";
+        var time = HttpContext.Current.Request.Params["time"] + "";
+        var title = HttpContext.Current.Request.Params["title"] + "";
+        try
+        {
+            var bll = new ExamBLL.StudyBLL();
+            if (ExamDAL.DbHelperSQL.ExecuteSql("UPDATE T_Study SET title=@title,fileurl=@fileurl,time=@time  WHERE fileurl=@oldfileurl", new SqlParameter("@title", title),new SqlParameter("@fileurl", fileurl),new SqlParameter("@time", time),new SqlParameter("@oldfileurl", oldfileurl)) > 0)
+            {
+                string URL = HttpContext.Current.Server.MapPath(oldfileurl);
+                File.Delete(URL);
+                jsonResult.msg = "更新成功";
             }
         }
         catch(Exception e)

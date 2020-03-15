@@ -80,7 +80,7 @@
                 </el-upload>
                 <!--<input class="el-input" type="file" multiple id="filebox" @change="getFile($event)" autocomplete="off">-->
                 <el-divider></el-divider>
-                <el-button v-show="fileflag" type="primary" @click="submitForm($event)">提交</el-button>
+                <el-button v-show="fileflag" type="primary" @click="submitForm()">提交</el-button>
                 <el-button @click="reset">重置</el-button>
             </el-dialog>
             <el-dialog :title="form.title" :visible.sync="dialogFormVisible1" width="1000px">
@@ -94,7 +94,7 @@
             </el-dialog>
             <el-dialog :title="form.title" :visible.sync="dialogFormVisible4" width="700px">
                 <el-divider><i class="el-icon-mobile-phone"></i>  输入课程标题</el-divider>
-                <el-input type="text" v-model="form.title" autocomplete="off"></el-input>
+                <el-input type="text" v-model="form.title"  autocomplete="off"></el-input>
                 <el-divider><i class="el-icon-mobile-phone"></i>  提交资源</el-divider>
                 <el-input type="text" v-show="!uploadflag" v-model="form.fileurl" autocomplete="off"></el-input>
                 <el-divider></el-divider>
@@ -107,9 +107,10 @@
                            :auto-upload="false">
                     <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
                     <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
-                    <el-divider></el-divider>
                 </el-upload>
-                <el-button size="small" type="primary" @click="update">更新</el-button>
+                <el-divider></el-divider>
+                <el-button v-show="!fileflag" size="small" type="primary" @click="update">更新</el-button>
+                <el-button v-show="fileflag" size="small" type="primary" @click="submitUpdate()">提交</el-button>
                 <el-button size="small" type="danger" @click="deletelist">删除</el-button>
 
 
@@ -121,7 +122,9 @@
         el:"#studylist",
         data: {
             uploadflag: false,
+            oldfileurl:'',
             fileList: [],
+            newtitle:'',
             fullscreen: true,
             loading: false,
             dialogFormVisible: false,
@@ -159,7 +162,7 @@
                     });
             },
             update() {
-                this.uploadflag=true
+                this.uploadflag = true
             },
             handleClick(row) {
                 this.form = {}
@@ -192,7 +195,8 @@
                 return postf
             },
             option(row) {
-                this.form = row
+                this.form=row
+                this.oldfileurl = row.fileurl
                 this.dialogFormVisible4 = true
                 this.uploadflag=false
             },
@@ -213,8 +217,42 @@
                 });
                 this.fileurl = response.fileurl
                 this.content=response.filename
-              },
-            submitForm(event) {
+            },
+            submitUpdate() {
+                var this_=this
+                var fileurl=this_.fileurl
+                var oldfileurl=this_.oldfileurl
+                var title=this_.form.title
+                var myDate = new Date()
+                    var t = myDate.toLocaleDateString();
+                    var t1 = myDate.toLocaleTimeString();
+                    if (title == '') {
+                        this.$notify.error({
+                            title: '错误',
+                            message: '请填写标题！'
+                        });
+                        return false
+                }
+                    $.ajax({
+                        url: "../tools/StudyHandler.ashx",
+                        data: { action: "updatestudylist", title: title, time: t + t1, fileurl: fileurl, oldfileurl:oldfileurl },
+                        //data: formData,
+                        dataType: "json",
+                        type: "post",
+                        success: function (json) {
+                            this_.fileList = []
+                            this_.dialogFormVisible4 = this_.fileflag= false
+                            if (json.msg == '更新成功') {
+                                this_.$message.success({
+                                        title: '成功',
+                                        message: '更新成功！'
+                                });
+                            }
+                            this_.getlist()
+                        }
+                    });
+            },
+            submitForm() {
                 var this_=this
                 //if (this.title == '' && this.content == '') {
                 if (this_.title == ''&&this_.fileurl=='') {
@@ -227,11 +265,6 @@
                     var myDate = new Date()
                     var t = myDate.toLocaleDateString();
                     var t1 = myDate.toLocaleTimeString();
-                    let config = {
-                        headers: {
-                            'Content-Type': 'multipart/form-data'
-                        }
-                    }
                     if (this_.title == '') {
                         this.$notify.error({
                             title: '错误',
