@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<XmlSyntaxSettingsInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ShowMargin>false</ShowMargin>
+  <HighlightHyperText>true</HighlightHyperText>
+  <ColorThemes>
+    <ColorThemes>
+      <ColorTheme>
+        <LexStyles>
+          <Style>
+            <Name>symbols</Name>
+            <Desc>Symbols</Desc>
+            <ForeColor>WindowText</ForeColor>
+          </Style>
+          <Style>
+            <Name>idents</Name>
+            <Desc>Identifiers</Desc>
+            <ForeColor>ControlText</ForeColor>
+          </Style>
+          <Style>
+            <Name>numbers</Name>
+            <Desc>Numbers</Desc>
+            <ForeColor>ControlText</ForeColor>
+          </Style>
+          <Style>
+            <Name>reswords</Name>
+            <Desc>ResWords</Desc>
+            <ForeColor>Blue</ForeColor>
+          </Style>
+          <Style>
+            <Name>comments</Name>
+            <Desc>Comments</Desc>
+            <ForeColor>Green</ForeColor>
+            <PlainText>true</PlainText>
+          </Style>
+          <Style>
+            <Name>strings</Name>
+            <Desc>Strings</Desc>
+            <ForeColor>Maroon</ForeColor>
+            <PlainText>true</PlainText>
+          </Style>
+          <Style>
+            <Name>directives</Name>
+            <Desc>Directives</Desc>
+            <ForeColor>Blue</ForeColor>
+          </Style>
+          <Style>
+            <Name>xmlcomments</Name>
+            <Desc>XML Comments</Desc>
+            <ForeColor>Gray</ForeColor>
+            <PlainText>true</PlainText>
+          </Style>
+          <Style>
+            <Name>htmlparams</Name>
+            <Desc>HTML Params</Desc>
+            <ForeColor>Red</ForeColor>
+          </Style>
+          <Style>
+            <Name>whitespace</Name>
+            <Desc>WhiteSpace</Desc>
+            <ForeColor>WindowText</ForeColor>
+          </Style>
+          <Style>
+            <Name>linenumbers</Name>
+            <Desc>Line Numbers</Desc>
+            <ForeColor>Teal</ForeColor>
+          </Style>
+          <Style>
+            <Name>hypertext</Name>
+            <Desc>HyperText</Desc>
+            <ForeColor>Blue</ForeColor>
+            <FontStyle>Underline</FontStyle>
+          </Style>
+          <Style>
+            <Name>spelling</Name>
+            <Desc>Misspelled Words</Desc>
+            <ForeColor>Navy</ForeColor>
+          </Style>
+          <Style>
+            <Name>windowcolor</Name>
+            <Desc>Window Color</Desc>
+            <BackColor>Window</BackColor>
+            <ForeColorEnabled>false</ForeColorEnabled>
+          </Style>
+          <Style>
+            <Name>bracematching</Name>
+            <Desc>Brace Matching</Desc>
+            <ForeColor>Black</ForeColor>
+            <BackColorEnabled>false</BackColorEnabled>
+          </Style>
+          <Style>
+            <Name>gutterpencolor</Name>
+            <Desc>Gutter Pen Color</Desc>
+            <ForeColor>Gray</ForeColor>
+            <BackColor>Control</BackColor>
+          </Style>
+          <Style>
+            <Name>linemodificatorchanged</Name>
+            <Desc>Line Modificator Changed</Desc>
+            <ForeColor>255:255:216:0</ForeColor>
+            <BackColorEnabled>false</BackColorEnabled>
+          </Style>
+          <Style>
+            <Name>linemodificatorsaved</Name>
+            <Desc>Line Modificator Saved</Desc>
+            <ForeColor>255:21:194:60</ForeColor>
+            <BackColorEnabled>false</BackColorEnabled>
+          </Style>
+          <Style>
+            <Name>lineseparator</Name>
+            <Desc>Line Separator</Desc>
+            <ForeColor>ControlText</ForeColor>
+            <BackColorEnabled>false</BackColorEnabled>
+          </Style>
+          <Style>
+            <Name>codeoutlinepencolor</Name>
+            <Desc>Code Outline Pen Color</Desc>
+            <ForeColor>DarkGray</ForeColor>
+            <BackColorEnabled>false</BackColorEnabled>
+          </Style>
+          <Style>
+            <Name>activeselectioncolor</Name>
+            <Desc>Active Selection Color</Desc>
+            <ForeColor>HighlightText</ForeColor>
+            <BackColor>255:173:214:255</BackColor>
+          </Style>
+          <Style>
+            <Name>inactiveselectioncolor</Name>
+            <Desc>Inactive Selection Color</Desc>
+            <ForeColor>InactiveCaptionText</ForeColor>
+            <BackColor>InactiveCaption</BackColor>
+          </Style>
+        </LexStyles>
+        <Name>Default</Name>
+        <ReadOnly>true</ReadOnly>
+      </ColorTheme>
+    </ColorThemes>
+    <ActiveThemeIndex>0</ActiveThemeIndex>
+  </ColorThemes>
+  <ActiveThemeIndex>0</ActiveThemeIndex>
+</XmlSyntaxSettingsInfo>
